@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/jeux/:genre((?!categorie|selection)[^/]+)",
+        destination: "/jeux/categorie/:genre",
+        permanent: true,
+      },
+      {
+        source: "/jeux/:genre((?!categorie|selection)[^/]+)/:joueurs",
+        destination: "/jeux/categorie/:genre",
+        permanent: true,
+      },
+      {
+        source: "/jeux/:genre((?!categorie|selection)[^/]+)/:joueurs/:duree",
+        destination: "/jeux/categorie/:genre",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "placehold.co" },
