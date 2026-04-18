@@ -106,15 +106,14 @@ export default function EnrichissementManager({ initialJeux }: Props) {
   }
 
   // Dummy categories for the form (will be fetched via the page but we need to pass something)
-  const categories: AdminCategorie[] = jeux
-    .flatMap((j) =>
-      (j.jeux_categories ?? []).map((jc) =>
-        jc.categories ? { id: jc.categories.id, slug: "", nom: jc.categories.nom, type: "category", parent_id: null } : null,
-      ),
-    )
-    .filter((x): x is AdminCategorie => x !== null)
-    .filter((c): c is AdminCategorie => c !== null)
-    .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
+  const categories: AdminCategorie[] = (jeux
+  .flatMap((j) =>
+    (j.jeux_categories ?? []).map((jc) =>
+      jc.categories ? { id: jc.categories.id, slug: "", nom: jc.categories.nom, type: "category" as const, parent_id: null } : null,
+    ),
+  )
+  .filter((x) => x !== null) as AdminCategorie[])
+  .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
 
   return (
     <div className="space-y-6">

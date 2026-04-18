@@ -51,7 +51,7 @@ function toJeu(row: SupabaseJeu): Jeu {
     regles:      row.regles ?? [],
     imageUrl:    row.image_url ?? "",
     categories:  (row.jeux_categories ?? []).map((jc) => jc.categories?.nom ?? "").filter(Boolean),
-    acheter:     prix as AcheterJeu,
+    acheter: prix as unknown as AcheterJeu,
   };
 }
 
