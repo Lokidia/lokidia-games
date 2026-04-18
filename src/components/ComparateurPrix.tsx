@@ -16,17 +16,29 @@ function parsePrix(p: string): number {
   return parseFloat(p.replace(",", ".").replace("€", "").trim());
 }
 
-function trouverMinPrix(acheter: AcheterJeu): number {
-  return Math.min(
-    parsePrix(acheter.amazon.prix),
-    parsePrix(acheter.philibert.prix),
-    parsePrix(acheter.cultura.prix),
-    parsePrix(acheter.fnac.prix)
-  );
+function hasPrix(p: string): boolean {
+  const v = parsePrix(p);
+  return !isNaN(v) && v > 0;
+}
+
+function hasUrl(url: string): boolean {
+  return url.startsWith("http");
+}
+
+function trouverMinPrix(acheter: AcheterJeu): number | null {
+  const vals = [acheter.amazon, acheter.philibert, acheter.cultura, acheter.fnac]
+    .filter(m => hasPrix(m.prix))
+    .map(m => parsePrix(m.prix));
+  return vals.length > 0 ? Math.min(...vals) : null;
 }
 
 function afficherPrix(p: number): string {
   return p.toFixed(2).replace(".", ",") + "€";
+}
+
+function hasAnyLink(acheter: AcheterJeu): boolean {
+  return [acheter.amazon, acheter.philibert, acheter.cultura, acheter.fnac]
+    .some(m => hasUrl(m.url));
 }
 
 function buildMarchands(acheter: AcheterJeu): Marchand[] {
@@ -89,6 +101,8 @@ export default function ComparateurPrix({ nomJeu, acheter }: Props) {
   const minPrix = acheter ? trouverMinPrix(acheter) : null;
   const marchands = acheter ? buildMarchands(acheter) : [];
 
+  if (!acheter || !hasAnyLink(acheter)) return null;
+
   return (
     <div className="relative" ref={panneauRef}>
       <button
@@ -101,9 +115,10 @@ export default function ComparateurPrix({ nomJeu, acheter }: Props) {
       >
         <span>🛒</span>
         <span>
-          Meilleur prix
-          {minPrix !== null && (
-            <span className="font-bold"> — dès {afficherPrix(minPrix)}</span>
+          {minPrix !== null ? (
+            <>Meilleur prix — <span className="font-bold">dès {afficherPrix(minPrix)}</span></>
+          ) : (
+            "Voir le prix"
           )}
         </span>
         <svg
@@ -137,9 +152,9 @@ export default function ComparateurPrix({ nomJeu, acheter }: Props) {
           </div>
 
           <div className="p-2 flex flex-col gap-1">
-            {marchands.map((m) => {
+            {marchands.filter(m => hasUrl(m.data.url)).map((m) => {
               const prix = parsePrix(m.data.prix);
-              const estLeMoinscher = minPrix !== null && prix === minPrix;
+              const estLeMoinscher = minPrix !== null && hasPrix(m.data.prix) && prix === minPrix;
 
               return (
                 <a
@@ -160,7 +175,7 @@ export default function ComparateurPrix({ nomJeu, acheter }: Props) {
                       </span>
                     )}
                     <span className={`text-sm font-bold ${estLeMoinscher ? "text-emerald-700" : "text-gray-800"}`}>
-                      {m.data.prix}
+                      {hasPrix(m.data.prix) ? m.data.prix : "Voir le prix"}
                     </span>
                     <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

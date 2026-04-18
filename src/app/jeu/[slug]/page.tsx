@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getJeuBySlug, getAllJeuxSlugs } from "@/lib/jeux-repository";
 import ComparateurPrix from "@/components/ComparateurPrix";
+import DescriptionExpand from "@/components/DescriptionExpand";
 import { Complexite } from "@/types/jeu";
 
 function getComplexiteColor(complexite: Complexite): string {
@@ -50,11 +51,13 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
             <p className="text-gray-500 mt-1">{jeu.annee}</p>
           </div>
           <div className="bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-xl">
-            {jeu.note}/10
+            {jeu.note > 0 && (
+  <span>{jeu.note}/10</span>
+)}
           </div>
         </div>
 
-        <p className="text-gray-700 text-lg leading-relaxed">{jeu.description}</p>
+        <DescriptionExpand text={jeu.description} />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
@@ -94,19 +97,21 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
           </div>
         </div>
 
-        <div>
-          <h2 className="text-lg font-bold text-amber-900 mb-3">Comment jouer ?</h2>
-          <ul className="flex flex-col gap-2">
-            {jeu.regles.map((regle, i) => (
-              <li key={i} className="flex gap-3 text-gray-700">
-                <span className="bg-amber-700 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                {regle}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {jeu.regles.length > 0 ? (
+          <div>
+            <h2 className="text-lg font-bold text-amber-900 mb-3">Comment jouer ?</h2>
+            <ul className="flex flex-col gap-2">
+              {jeu.regles.map((regle, i) => (
+                <li key={i} className="flex gap-3 text-gray-700">
+                  <span className="bg-amber-700 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  {regle}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="max-w-sm">
           <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />

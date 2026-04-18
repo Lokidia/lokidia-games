@@ -10,7 +10,10 @@
     "seed-seo": "tsx scripts/seed-seo.ts",
     "migrate": "tsx scripts/migrate-to-supabase.ts",
     "fix-categories": "tsx scripts/fix-categories.ts",
-    "fetch-bgg-images": "tsx scripts/fetch-bgg-images.ts"
+    "fetch-bgg-images": "tsx scripts/fetch-bgg-images.ts",
+    "import-bgg": "tsx scripts/import-bgg.ts",
+    "clean-and-translate": "tsx scripts/clean-and-translate.ts",
+    "fix-rules": "tsx scripts/fix-rules.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
