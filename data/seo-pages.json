@@ -1,1 +1,93 @@
-[]
+[
+  {
+    "input_hash": "fe5375d792b9fcf2ea4e774e2972f6d4fbb53eea7ac3177b516f1870b05e9c82",
+    "slug": "strategie",
+    "payload_json": {
+      "title": "Jeux de Stratégie : Nos Recommandations",
+      "meta": "Découvrez nos meilleurs jeux de stratégie. Tactique, réflexion et défis stratégiques pour tous les passionnés de jeux de société.",
+      "url": "/jeux/strategie",
+      "h1": "Les meilleurs jeux de stratégie pour les amateurs de tactique",
+      "intro": "Les jeux de stratégie sont parfaits pour ceux qui aiment exercer leur esprit tactique et prendre des décisions réfléchies. Qu'il s'agisse de gérer des ressources, de conquérir des territoires ou de construire un empire, ces jeux demandent de la planification et de l'anticipation. Nous avons sélectionné pour vous les meilleurs jeux de stratégie disponibles sur le marché, adaptés à différents profils de joueurs. Plongez dans l'univers des jeux où chaque coup compte et où la victoire appartient aux plus stratèges.",
+      "sections": [
+        {
+          "h2": "Qu'est-ce qui caractérise un bon jeu de stratégie ?",
+          "text": "Un jeu de stratégie se distingue par sa profondeur de gameplay et la nécessité de planifier plusieurs coups à l'avance. Les mécaniques doivent récompenser la réflexion et offrir différents chemins vers la victoire plutôt qu'une unique solution. Les meilleurs jeux de stratégie trouvent un équilibre entre complexité et accessibilité, permettant aux novices de débuter tout en offrant des couches de profondeur pour les joueurs expérimentés. L'interaction entre les joueurs est également cruciale pour créer des moments mémorables et des situations toujours différentes."
+        },
+        {
+          "h2": "Les mécaniques essentielles des jeux de stratégie",
+          "text": "La gestion de ressources est souvent au cœur des jeux de stratégie, où chaque décision d'investissement impacte votre position. Les mécaniques de placement, de contrôle de territoire ou de développement technologique créent des défis stratégiques variés. Certains jeux misent sur la négociation et l'interaction directe entre joueurs, transformant la stratégie en jeu social et politique. D'autres privilégient la compétition solitaire où chacun poursuit ses objectifs sans blocage direct, créant une atmosphère de course stratégique."
+        },
+        {
+          "h2": "Comment choisir le bon jeu de stratégie pour vous ?",
+          "text": "Le choix dépend d'abord de vos préférences : cherchez-vous des jeux courts et dynamiques ou des expériences plus longues et immersives ? Votre groupe de joueurs influence aussi le type de stratégie recherché, certains jeux récompardant la diplomatie quand d'autres misent sur la pure tactique. Le niveau de complexité est un facteur important : certains adorent l'apprentissage de règles élaborées tandis que d'autres préfèrent une prise en main rapide. Consultez notre sélection pour trouver le jeu qui correspond parfaitement à votre style de jeu."
+        }
+      ],
+      "faq": [
+        {
+          "question": "Quel est le meilleur jeu de stratégie pour les débutants ?",
+          "answer": "Les débutants devraient rechercher des jeux avec des règles claires et accessibles mais offrant une véritable profondeur stratégique. Privilégiez des jeux où les décisions comptent sans que la courbe d'apprentissage soit trop abrupte. Consultez nos recommandations spécialisées pour les jeux de stratégie accessibles."
+        },
+        {
+          "question": "Combien de temps dure généralement une partie de jeu de stratégie ?",
+          "answer": "La durée varie considérablement selon le jeu : certains se jouent en 30 minutes quand d'autres dépassent les 2 heures. Les jeux de stratégie lourds demandent généralement plus de temps pour explorer toutes les possibilités tactiques. Vérifiez toujours la durée estimée avant d'acheter pour correspondre à votre disponibilité."
+        },
+        {
+          "question": "Est-ce qu'un jeu de stratégie se joue à plusieurs obligatoirement ?",
+          "answer": "Non, certains jeux de stratégie excellent en solo contre le jeu lui-même, avec des mécaniques équilibrées pour une personne seule. D'autres sont conçus pour l'interaction entre joueurs et perdent de l'intérêt en solo. Nous indiquons toujours si un jeu offre une excellente expérience solo dans nos fiches détaillées."
+        }
+      ],
+      "similarPages": [
+        {
+          "keyword": "Jeux de stratégie pour 2 joueurs",
+          "url": "/jeux/strategie-2-joueur"
+        },
+        {
+          "keyword": "Jeux de gestion de ressources",
+          "url": "/jeux/gestion-ressource"
+        },
+        {
+          "keyword": "Jeux de placement d'ouvriers",
+          "url": "/jeux/placement-ouvrier"
+        },
+        {
+          "keyword": "Jeux de stratégie rapides",
+          "url": "/jeux/strategie-rapide"
+        },
+        {
+          "keyword": "Jeux de conquête de territoire",
+          "url": "/jeux/conquete-territoire"
+        },
+        {
+          "keyword": "Jeux de stratégie complexes",
+          "url": "/jeux/strategie-complexe"
+        },
+        {
+          "keyword": "Jeux de stratégie accessibles",
+          "url": "/jeux/strategie-accessible"
+        },
+        {
+          "keyword": "Jeux de plateau stratégiques",
+          "url": "/jeux/plateau-strategique"
+        },
+        {
+          "keyword": "Jeux de développement économique",
+          "url": "/jeux/developpement-economique"
+        },
+        {
+          "keyword": "Jeux de stratégie coopératifs",
+          "url": "/jeux/strategie-cooperatif"
+        }
+      ],
+      "internalLinks": [
+        "/jeux/strategie-2-joueur",
+        "/jeux/gestion-ressource",
+        "/jeux/strategie-rapide",
+        "/jeux/strategie-accessible",
+        "/jeux/plateau-strategique"
+      ]
+    },
+    "status": "generated",
+    "generated_at": "2026-04-18T17:34:51.094Z",
+    "updated_at": "2026-04-18T17:34:51.094Z"
+  }
+]

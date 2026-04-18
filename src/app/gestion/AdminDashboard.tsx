@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import type { SeoGenerationInput, SeoPage, SeoPageStatus } from "@/lib/seo/types";
 
-const SeoEditModal = dynamic(() => import("@/app/admin/seo/_components/SeoEditModal"), { ssr: false });
+const SeoEditModal = dynamic(() => import("@/app/gestion/seo/_components/SeoEditModal"), { ssr: false });
 
 export interface TargetItem {
   label: string;
@@ -79,8 +79,9 @@ export default function AdminDashboard({ targets, extraPages }: Props) {
   const [loadingKeys, setLoadingKeys] = useState<Set<string>>(new Set());
   const [errorKeys,   setErrorKeys]   = useState<Map<string, string>>(new Map());
   const [freshKeys,   setFreshKeys]   = useState<Set<string>>(new Set());
-  const [editState,   setEditState]   = useState<EditState | null>(null);
-  const [loadingEdit, setLoadingEdit] = useState<string | null>(null);
+  const [editState,      setEditState]      = useState<EditState | null>(null);
+  const [loadingEdit,    setLoadingEdit]    = useState<string | null>(null);
+  const [expandedErrors, setExpandedErrors] = useState<Set<string>>(new Set());
 
   const generated = targets.filter((t) => t.generated || freshKeys.has(t.url)).length;
   const total     = targets.length;
@@ -228,7 +229,17 @@ export default function AdminDashboard({ targets, extraPages }: Props) {
                       {item.url}
                     </Link>
                     {error && (
-                      <p className="text-xs text-red-500 mt-0.5 line-clamp-2" title={error}>⚠ {error}</p>
+                      <button
+                        className={`text-left text-xs text-red-500 mt-0.5 hover:text-red-700 transition-colors ${expandedErrors.has(key) ? "" : "line-clamp-2"}`}
+                        title="Cliquer pour voir l'erreur complète"
+                        onClick={() => setExpandedErrors((prev) => {
+                          const s = new Set(prev);
+                          s.has(key) ? s.delete(key) : s.add(key);
+                          return s;
+                        })}
+                      >
+                        ⚠ {error}
+                      </button>
                     )}
                   </div>
 

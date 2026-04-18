@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/admin",               label: "Dashboard",      icon: "📊", exact: true },
-  { href: "/admin/jeux",          label: "Jeux",           icon: "🎲" },
-  { href: "/admin/categories",    label: "Catégories",     icon: "🗂️" },
-  { href: "/admin/associations",  label: "Associations",   icon: "🔗" },
-  { href: "/admin/enrichissement",label: "Enrichissement", icon: "✅" },
-  { href: "/admin/seo",           label: "SEO",            icon: "🔍" },
+  { href: "/gestion",               label: "Dashboard",      icon: "📊", exact: true },
+  { href: "/gestion/jeux",          label: "Jeux",           icon: "🎲" },
+  { href: "/gestion/categories",    label: "Catégories",     icon: "🗂️" },
+  { href: "/gestion/associations",  label: "Associations",   icon: "🔗" },
+  { href: "/gestion/enrichissement",label: "Enrichissement", icon: "✅" },
+  { href: "/gestion/seo",           label: "SEO",            icon: "🔍" },
 ];
 
 export default function AdminNav() {
@@ -52,6 +52,14 @@ export default function AdminNav() {
         >
           <span>←</span> Retour au site
         </Link>
+        <form action="/api/gestion/logout" method="POST">
+          <button
+            type="submit"
+            className="flex items-center gap-2 text-xs text-amber-400/60 hover:text-red-400 transition-colors w-full text-left"
+          >
+            <span>🔓</span> Déconnexion
+          </button>
+        </form>
       </div>
     </aside>
   );

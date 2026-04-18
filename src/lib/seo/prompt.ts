@@ -1,25 +1,40 @@
 import { SeoGenerationInput } from "./types";
 
 const OUTPUT_SCHEMA = `{
-  "title": "",
-  "meta": "",
-  "url": "",
-  "h1": "",
-  "intro": "",
+  "title": "string — 60 chars max",
+  "meta": "string — 155 chars max",
+  "url": "string — must start with /jeux/",
+  "h1": "string",
+  "intro": "string — 3 to 5 sentences, editorial paragraph about this game category",
   "sections": [
-    { "h2": "", "text": "" },
-    { "h2": "", "text": "" },
-    { "h2": "", "text": "" }
+    { "h2": "string", "text": "string — 3-5 sentences" },
+    { "h2": "string", "text": "string — 3-5 sentences" },
+    { "h2": "string", "text": "string — 3-5 sentences" }
   ],
   "faq": [
-    { "question": "", "answer": "" },
-    { "question": "", "answer": "" },
-    { "question": "", "answer": "" }
+    { "question": "string", "answer": "string — 2-3 sentences" },
+    { "question": "string", "answer": "string — 2-3 sentences" },
+    { "question": "string", "answer": "string — 2-3 sentences" }
   ],
   "similarPages": [
-    { "keyword": "", "url": "" }
+    { "keyword": "string", "url": "string — internal path starting with /jeux/" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" },
+    { "keyword": "string", "url": "string" }
   ],
-  "internalLinks": []
+  "internalLinks": [
+    "/jeux/example-1",
+    "/jeux/example-2",
+    "/jeux/example-3",
+    "/jeux/example-4",
+    "/jeux/example-5"
+  ]
 }`;
 
 export function buildSeoPrompt(input: SeoGenerationInput): string {
@@ -55,10 +70,10 @@ CONTRAINTES :
 - Il faut exactement 5 internalLinks
 
 IMPORTANT :
-- Réponds uniquement avec un JSON valide
-- N’ajoute aucun markdown
-- N’ajoute aucun texte avant ou après le JSON
-- L'URL finale canonique sera reconstruite côté application, donc propose une URL cohérente mais simple
+- Réponds UNIQUEMENT avec du JSON valide — aucun markdown, aucun bloc \`\`\`, aucun texte avant ou après
+- Le JSON doit commencer exactement par { et se terminer par }
+- internalLinks doit être un tableau de 5 chaînes de caractères (URLs internes), PAS d’objets
+- L’URL finale canonique sera reconstruite côté application
 - Respecte exactement ce schéma :
 ${OUTPUT_SCHEMA}`;
 }

@@ -20,7 +20,8 @@ import {
   SeoSimilarPage,
 } from "./types";
 
-const DEFAULT_MODEL = process.env.ANTHROPIC_SEO_MODEL ?? "claude-haiku-4-5-20251001";
+const DEFAULT_MODEL      = process.env.ANTHROPIC_SEO_MODEL ?? "claude-haiku-4-5-20251001";
+const DEFAULT_MAX_TOKENS = 4096;
 
 function extractJsonObject(raw: string): string {
   const trimmed = raw.trim();
@@ -99,12 +100,29 @@ function parseSimilarPage(value: unknown, index: number): SeoSimilarPage {
   };
 }
 
+function coerceToString(item: unknown): string | null {
+  if (typeof item === "string") return item.trim() || null;
+  // Claude sometimes returns objects like {"text":"...", "url":"..."} instead of plain strings.
+  // Extract the url field if present, otherwise text.
+  if (item && typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    const candidate = obj.url ?? obj.text ?? obj.href ?? obj.link ?? obj.value;
+    if (typeof candidate === "string") return candidate.trim() || null;
+  }
+  return null;
+}
+
 function parseStringList(value: unknown, fieldName: string): string[] {
   if (!Array.isArray(value)) {
     throw new Error(`Invalid field "${fieldName}"`);
   }
 
-  return value.map((item, index) => toNonEmptyString(item, `${fieldName}[${index}]`));
+  return value
+    .map((item, index) => {
+      const str = coerceToString(item);
+      if (str === null) throw new Error(`Invalid field "${fieldName}[${index}]"`);
+      return str;
+    });
 }
 
 function parseSeoPage(raw: string, canonical: CanonicalSeoInput): SeoPage {
@@ -150,7 +168,7 @@ async function generateSeoPayload(input: SeoGenerationInput, canonical: Canonica
 
   const response = await client.messages.create({
     model: DEFAULT_MODEL,
-    max_tokens: 2500,
+    max_tokens: DEFAULT_MAX_TOKENS,
     messages: [
       {
         role: "user",
