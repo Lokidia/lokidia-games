@@ -1,0 +1,169 @@
+// ============================================================
+// Lokidia Games — Schéma Prisma
+// Docs : https://pris.ly/d/prisma-schema
+//
+// Commandes utiles :
+//   npx prisma generate          → génère le client TypeScript
+//   npx prisma db push           → applique le schéma (dev sans migration)
+//   npx prisma migrate dev       → crée et applique une migration SQL
+//   npx prisma studio            → GUI d'exploration des données
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // DATABASE_URL  = connexion poolée (PgBouncer) — pour les requêtes Next.js
+  // DIRECT_URL    = connexion directe — pour les migrations Prisma
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ────────────────────────────────────────────────────────────
+// Enums
+// ────────────────────────────────────────────────────────────
+
+enum Complexite {
+  TresSimple    @map("Très simple")
+  Simple
+  Intermediaire @map("Intermédiaire")
+  Complexe
+  Expert
+
+  @@map("complexite_level")
+}
+
+enum Marchand {
+  amazon
+  philibert
+  cultura
+  fnac
+
+  @@map("marchand_type")
+}
+
+enum SeoStatus {
+  generated
+  published
+  draft
+  archived
+
+  @@map("seo_status")
+}
+
+enum TypeCategorie {
+  group
+  category
+  tag
+
+  @@map("category_type")
+}
+
+// ────────────────────────────────────────────────────────────
+// Jeu
+// ────────────────────────────────────────────────────────────
+
+model Jeu {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug        String     @unique
+  nom         String
+  annee       Int        @db.SmallInt
+  description String
+  joueursMin  Int        @map("joueurs_min") @db.SmallInt
+  joueursMax  Int        @map("joueurs_max") @db.SmallInt
+  dureeMin    Int        @map("duree_min") @db.SmallInt
+  dureeMax    Int        @map("duree_max") @db.SmallInt
+  ageMin      Int        @map("age_min") @db.SmallInt
+  complexite  Complexite
+  note        Decimal    @db.Decimal(3, 1)
+  mecaniques  String[]
+  regles      String[]
+  imageUrl    String     @map("image_url") @default("")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  prix        JeuPrix[]
+  categories  JeuCategorie[]
+
+  @@map("jeux")
+}
+
+// ────────────────────────────────────────────────────────────
+// Prix par marchand (1 ligne = 1 marchand pour 1 jeu)
+// ────────────────────────────────────────────────────────────
+
+model JeuPrix {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jeuId    String   @map("jeu_id") @db.Uuid
+  marchand Marchand
+  url      String
+  // Format original "34,95€" conservé pour affichage direct
+  prix     String
+
+  // Relations
+  jeu      Jeu      @relation(fields: [jeuId], references: [id], onDelete: Cascade)
+
+  @@unique([jeuId, marchand])
+  @@map("jeux_prix")
+}
+
+// ────────────────────────────────────────────────────────────
+// Catégorie (arborescence : parent_id null = racine)
+// ────────────────────────────────────────────────────────────
+
+model Categorie {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug      String        @unique
+  nom       String
+  parentId  String?       @map("parent_id") @db.Uuid
+  position  Int           @default(0) @db.SmallInt
+  type      TypeCategorie @default(category)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Auto-relation hiérarchique
+  parent    Categorie?     @relation("CategorieHierarchie", fields: [parentId], references: [id], onDelete: Cascade)
+  enfants   Categorie[]    @relation("CategorieHierarchie")
+
+  // Jeux liés
+  jeux      JeuCategorie[]
+
+  @@map("categories")
+}
+
+// ────────────────────────────────────────────────────────────
+// Liaison jeux ↔ catégories (N×N)
+// ────────────────────────────────────────────────────────────
+
+model JeuCategorie {
+  jeuId       String    @map("jeu_id") @db.Uuid
+  categorieId String    @map("categorie_id") @db.Uuid
+
+  // Relations
+  jeu         Jeu       @relation(fields: [jeuId], references: [id], onDelete: Cascade)
+  categorie   Categorie @relation(fields: [categorieId], references: [id], onDelete: Cascade)
+
+  @@id([jeuId, categorieId])
+  @@map("jeux_categories")
+}
+
+// ────────────────────────────────────────────────────────────
+// Pages SEO (migration de data/seo-pages.json)
+// ────────────────────────────────────────────────────────────
+
+model SeoPage {
+  // inputHash = SHA-256 hex des inputs normalisés (clé de cache)
+  inputHash   String    @id @map("input_hash")
+  slug        String    @unique
+  // Contenu complet généré par Claude (SeoPage interface TypeScript)
+  payloadJson Json      @map("payload_json")
+  status      SeoStatus @default(generated)
+  generatedAt DateTime  @default(now()) @map("generated_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@index([generatedAt(sort: Desc)])
+  @@map("seo_pages")
+}
