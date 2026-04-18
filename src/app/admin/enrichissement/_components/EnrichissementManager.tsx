@@ -112,6 +112,7 @@ export default function EnrichissementManager({ initialJeux }: Props) {
         jc.categories ? { id: jc.categories.id, slug: "", nom: jc.categories.nom, type: "category", parent_id: null } : null,
       ),
     )
+    .filter((x): x is AdminCategorie => x !== null)
     .filter((c): c is AdminCategorie => c !== null)
     .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
 
