@@ -9,6 +9,8 @@ import ComparateurPrix from "@/components/ComparateurPrix";
 import DescriptionExpand from "@/components/DescriptionExpand";
 import { Complexite } from "@/types/jeu";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lokidia.games";
+
 interface RelatedGame {
   id: string;
   slug: string;
@@ -31,8 +33,7 @@ async function getRelations(slug: string): Promise<Relation[]> {
       .from("jeux_relations")
       .select("type, jeu_lie:jeu_lie_id(id, slug, nom, image_url, note)")
       .eq("jeu_id", (jeu as { id: string }).id);
-    // Supabase returns foreign keys as arrays when using the join syntax
-    return ((data ?? []) as unknown as Relation[]);
+    return (data ?? []) as unknown as Relation[];
   } catch {
     return [];
   }
@@ -82,182 +83,269 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
   const extensions = relations.filter((r) => r.type === "extension");
   const similaires = relations.filter((r) => r.type === "similaire");
 
+  // Breadcrumb: use the first categoryLink as the "main category"
+  const mainCat = jeu.categoryLinks?.[0] ?? null;
+
+  // JSON-LD: BreadcrumbList
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: "Accueil",     item: `${SITE_URL}/` },
+    { "@type": "ListItem", position: 2, name: "Jeux",        item: `${SITE_URL}/jeux` },
+    ...(mainCat
+      ? [{ "@type": "ListItem", position: 3, name: mainCat.nom, item: `${SITE_URL}/jeux/categorie/${mainCat.slug}` }]
+      : []),
+    { "@type": "ListItem", position: mainCat ? 4 : 3, name: jeu.nom, item: `${SITE_URL}/jeu/${slug}` },
+  ];
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
+
+  // JSON-LD: Game
+  const gameJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    name: jeu.nom,
+    description: jeu.description,
+    url: `${SITE_URL}/jeu/${slug}`,
+    numberOfPlayers: {
+      "@type": "QuantitativeValue",
+      minValue: jeu.joueursMin,
+      maxValue: jeu.joueursMax,
+    },
+    typicalAgeRange: `${jeu.ageMin}-`,
+    ...(jeu.imageUrl ? { image: jeu.imageUrl } : {}),
+  };
+
+  if (jeu.note > 0) {
+    gameJsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: jeu.note,
+      bestRating: 10,
+      worstRating: 0,
+      ratingCount: 1,
+    };
+  }
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link href="/jeux" className="text-amber-700 hover:underline text-sm mb-6 inline-block">
-        Retour aux jeux
-      </Link>
+    <>
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(gameJsonLd) }}
+      />
 
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col gap-6">
+      <div className="max-w-3xl mx-auto px-4 py-8">
 
-        {/* ── Image principale ── */}
-        <div className="relative h-64 bg-gray-100 flex items-center justify-center">
-          {jeu.imageUrl ? (
-            <Image
-              src={jeu.imageUrl}
-              alt={jeu.nom}
-              fill
-              className="object-contain p-4"
-              unoptimized
-              priority
-            />
-          ) : (
-            <span className="text-7xl select-none">🎲</span>
+        {/* ── Breadcrumb ── */}
+        <nav aria-label="Fil d'Ariane" className="flex items-center gap-1.5 text-sm text-gray-500 mb-6 flex-wrap">
+          <Link href="/" className="hover:text-amber-700 transition-colors">Accueil</Link>
+          <span className="text-gray-300">›</span>
+          <Link href="/jeux" className="hover:text-amber-700 transition-colors">Jeux</Link>
+          {mainCat && (
+            <>
+              <span className="text-gray-300">›</span>
+              <Link
+                href={`/jeux/categorie/${mainCat.slug}`}
+                className="hover:text-amber-700 transition-colors"
+              >
+                {mainCat.nom}
+              </Link>
+            </>
           )}
-        </div>
+          <span className="text-gray-300">›</span>
+          <span className="text-amber-800 font-semibold">{jeu.nom}</span>
+        </nav>
 
-        <div className="px-8 pb-8 flex flex-col gap-6">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col gap-6">
 
-          {/* ── Titre + note ── */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-amber-900">{jeu.nom}</h1>
-              <p className="text-gray-500 mt-1">{jeu.annee}</p>
-            </div>
-            {jeu.note > 0 && (
-              <div className="bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-xl shrink-0">
-                {jeu.note}/10
-              </div>
+          {/* ── Image principale ── */}
+          <div className="relative h-64 bg-gray-100 flex items-center justify-center">
+            {jeu.imageUrl ? (
+              <Image
+                src={jeu.imageUrl}
+                alt={jeu.nom}
+                fill
+                className="object-contain p-4"
+                unoptimized
+                priority
+              />
+            ) : (
+              <span className="text-7xl select-none">🎲</span>
             )}
           </div>
 
-          {/* ── Description ── */}
-          <DescriptionExpand text={jeu.description} />
+          <div className="px-8 pb-8 flex flex-col gap-6">
 
-          {/* ── Pourquoi ce jeu ? ── */}
-          {(jeu.pointsForts?.length ?? 0) > 0 && (
-            <div className="bg-amber-50 rounded-2xl p-5">
-              <h2 className="text-base font-bold text-amber-900 mb-3">Pourquoi ce jeu ?</h2>
-              <ul className="flex flex-col gap-2">
-                {(jeu.pointsForts ?? []).map((point, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                    <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✔</span>
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* ── Caractéristiques ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { label: "Joueurs", value: `${jeu.joueursMin}-${jeu.joueursMax}`, icon: "👥" },
-              { label: "Durée", value: `${jeu.dureeMin}-${jeu.dureeMax} min`, icon: "⏱️" },
-              { label: "Âge", value: `${jeu.ageMin}+`, icon: "🎂" },
-              { label: "Complexité", value: jeu.complexite, icon: "🧠", color: getComplexiteColor(jeu.complexite) },
-            ].map(({ label, value, icon, color }) => (
-              <div key={label} className="bg-amber-50 rounded-xl p-3 text-center">
-                <div className="text-xl mb-1">{icon}</div>
-                <div className={`font-semibold text-sm ${color ?? "text-amber-900"}`}>{value}</div>
-                <div className="text-xs text-gray-500">{label}</div>
+            {/* ── Titre + note ── */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-amber-900">{jeu.nom}</h1>
+                <p className="text-gray-500 mt-1">{jeu.annee}</p>
               </div>
-            ))}
-          </div>
-
-          {/* ── Catégories & mécaniques ── */}
-          <div className="flex flex-col gap-3">
-            <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Catégories</span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {jeu.categories.map((cat) => (
-                  <span key={cat} className="bg-amber-100 text-amber-800 text-sm px-3 py-1 rounded-full">
-                    {cat}
-                  </span>
-                ))}
-              </div>
+              {jeu.note > 0 && (
+                <div className="bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-xl shrink-0">
+                  {jeu.note}/10
+                </div>
+              )}
             </div>
-            <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mécaniques</span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {jeu.mecaniques.map((m) => (
-                  <span key={m} className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
-                    {m}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* ── Comment jouer ? ── */}
-          {jeu.regles.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-amber-900 mb-3">Comment jouer ?</h2>
-              <ul className="flex flex-col gap-2">
-                {jeu.regles.map((regle, i) => (
-                  <li key={i} className="flex gap-3 text-gray-700">
-                    <span className="bg-amber-700 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {i + 1}
+            {/* ── Description ── */}
+            <DescriptionExpand text={jeu.description} />
+
+            {/* ── Pourquoi ce jeu ? ── */}
+            {(jeu.pointsForts?.length ?? 0) > 0 && (
+              <div className="bg-amber-50 rounded-2xl p-5">
+                <h2 className="text-base font-bold text-amber-900 mb-3">Pourquoi ce jeu ?</h2>
+                <ul className="flex flex-col gap-2">
+                  {(jeu.pointsForts ?? []).map((point, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                      <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✔</span>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* ── Caractéristiques ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: "Joueurs",    value: `${jeu.joueursMin}-${jeu.joueursMax}`,    icon: "👥" },
+                { label: "Durée",      value: `${jeu.dureeMin}-${jeu.dureeMax} min`,    icon: "⏱️" },
+                { label: "Âge",        value: `${jeu.ageMin}+`,                         icon: "🎂" },
+                { label: "Complexité", value: jeu.complexite, icon: "🧠", color: getComplexiteColor(jeu.complexite) },
+              ].map(({ label, value, icon, color }) => (
+                <div key={label} className="bg-amber-50 rounded-xl p-3 text-center">
+                  <div className="text-xl mb-1">{icon}</div>
+                  <div className={`font-semibold text-sm ${color ?? "text-amber-900"}`}>{value}</div>
+                  <div className="text-xs text-gray-500">{label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Catégories & mécaniques ── */}
+            <div className="flex flex-col gap-3">
+              <div>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Catégories</span>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {(jeu.categoryLinks && jeu.categoryLinks.length > 0
+                    ? jeu.categoryLinks
+                    : jeu.categories.map((nom) => ({ nom, slug: "" }))
+                  ).map(({ nom, slug: catSlug }) =>
+                    catSlug ? (
+                      <Link
+                        key={catSlug}
+                        href={`/jeux/categorie/${catSlug}`}
+                        className="bg-amber-100 text-amber-800 text-sm px-3 py-1 rounded-full hover:bg-amber-200 transition-colors"
+                      >
+                        {nom}
+                      </Link>
+                    ) : (
+                      <span key={nom} className="bg-amber-100 text-amber-800 text-sm px-3 py-1 rounded-full">
+                        {nom}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mécaniques</span>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {jeu.mecaniques.map((m) => (
+                    <span key={m} className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                      {m}
                     </span>
-                    {regle}
-                  </li>
-                ))}
-              </ul>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
 
-          {/* ── Comparateur prix ── */}
-          <div className="max-w-sm">
-            <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />
+            {/* ── Comment jouer ? ── */}
+            {jeu.regles.length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold text-amber-900 mb-3">Comment jouer ?</h2>
+                <ul className="flex flex-col gap-2">
+                  {jeu.regles.map((regle, i) => (
+                    <li key={i} className="flex gap-3 text-gray-700">
+                      <span className="bg-amber-700 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {i + 1}
+                      </span>
+                      {regle}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* ── Comparateur prix ── */}
+            <div className="max-w-sm">
+              <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />
+            </div>
+
+            {/* ── Extensions disponibles ── */}
+            {extensions.length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold text-amber-900 mb-3">Extensions disponibles</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {extensions.map((r) => (
+                    <Link
+                      key={r.jeu_lie.slug}
+                      href={`/jeu/${r.jeu_lie.slug}`}
+                      className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 border border-amber-100 rounded-xl p-3 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
+                        {r.jeu_lie.image_url ? (
+                          <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
+                        ) : (
+                          <span className="flex items-center justify-center h-full text-lg">🎲</span>
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold text-amber-900 leading-tight line-clamp-2">{r.jeu_lie.nom}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Vous aimerez aussi ── */}
+            {similaires.length > 0 && (
+              <div>
+                <h2 className="text-lg font-bold text-amber-900 mb-3">Vous aimerez aussi</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {similaires.map((r) => (
+                    <Link
+                      key={r.jeu_lie.slug}
+                      href={`/jeu/${r.jeu_lie.slug}`}
+                      className="flex items-center gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl p-3 transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
+                        {r.jeu_lie.image_url ? (
+                          <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
+                        ) : (
+                          <span className="flex items-center justify-center h-full text-lg">🎲</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{r.jeu_lie.nom}</p>
+                        {r.jeu_lie.note > 0 && (
+                          <p className="text-xs text-amber-600 font-bold mt-0.5">⭐ {r.jeu_lie.note}/10</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
-
-          {/* ── Extensions disponibles ── */}
-          {extensions.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-amber-900 mb-3">Extensions disponibles</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {extensions.map((r) => (
-                  <Link
-                    key={r.jeu_lie.slug}
-                    href={`/jeu/${r.jeu_lie.slug}`}
-                    className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 border border-amber-100 rounded-xl p-3 transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
-                      {r.jeu_lie.image_url ? (
-                        <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
-                      ) : (
-                        <span className="flex items-center justify-center h-full text-lg">🎲</span>
-                      )}
-                    </div>
-                    <span className="text-sm font-semibold text-amber-900 leading-tight line-clamp-2">{r.jeu_lie.nom}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Vous aimerez aussi ── */}
-          {similaires.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-amber-900 mb-3">Vous aimerez aussi</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {similaires.map((r) => (
-                  <Link
-                    key={r.jeu_lie.slug}
-                    href={`/jeu/${r.jeu_lie.slug}`}
-                    className="flex items-center gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl p-3 transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
-                      {r.jeu_lie.image_url ? (
-                        <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
-                      ) : (
-                        <span className="flex items-center justify-center h-full text-lg">🎲</span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{r.jeu_lie.nom}</p>
-                      {r.jeu_lie.note > 0 && (
-                        <p className="text-xs text-amber-600 font-bold mt-0.5">⭐ {r.jeu_lie.note}/10</p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
-    </div>
+    </>
   );
 }

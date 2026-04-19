@@ -3,12 +3,32 @@
 import Link from "next/link";
 import { openConsentModal } from "@/lib/consent";
 
+interface FooterGame {
+  slug: string;
+  nom: string;
+}
+
+interface Props {
+  topGames?: FooterGame[];
+}
+
 const LIENS = [
-  { label: "À propos", href: "/a-propos" },
-  { label: "Contact", href: "/contact" },
-  { label: "Mentions légales", href: "/mentions-legales" },
-  { label: "Politique de confidentialité", href: "/confidentialite" },
-  { label: "CGU", href: "/cgu" },
+  { label: "À propos",                      href: "/a-propos" },
+  { label: "Contact",                        href: "/contact" },
+  { label: "Mentions légales",               href: "/mentions-legales" },
+  { label: "Politique de confidentialité",   href: "/confidentialite" },
+  { label: "CGU",                            href: "/cgu" },
+];
+
+const EXPLORER = [
+  { label: "Jeux de stratégie",   href: "/jeux/categorie/strategie" },
+  { label: "Jeux coopératifs",    href: "/jeux/categorie/cooperatif" },
+  { label: "Jeux familiaux",      href: "/jeux/categorie/familial" },
+  { label: "Parties rapides",     href: "/jeux/categorie/parties-rapides" },
+  { label: "Jeux à 2 joueurs",    href: "/jeux/categorie/a-2-joueurs" },
+  { label: "Idées cadeaux",       href: "/jeux/categorie/idees-cadeaux" },
+  { label: "Les mieux notés",     href: "/jeux?sort=note" },
+  { label: "Nouveautés",          href: "/jeux?sort=annee" },
 ];
 
 const RESEAUX = [
@@ -41,13 +61,14 @@ const RESEAUX = [
   },
 ];
 
-export default function Footer() {
+export default function Footer({ topGames = [] }: Props) {
   return (
     <footer className="bg-stone-950 text-stone-300">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
-          {/* Logo & description */}
-          <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
+
+          {/* ── Logo & description ── */}
+          <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white hover:text-amber-400 transition-colors w-fit">
               <span className="text-2xl">🎲</span>
               <span>Lokidia Games</span>
@@ -71,17 +92,47 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* ── Navigation ── */}
           <div>
             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Navigation</p>
             <ul className="flex flex-col gap-2">
-              <li><Link href="/" className="text-sm hover:text-amber-400 transition-colors">Accueil</Link></li>
-              <li><Link href="/jeux" className="text-sm hover:text-amber-400 transition-colors">Tous les jeux</Link></li>
+              <li><Link href="/"        className="text-sm hover:text-amber-400 transition-colors">Accueil</Link></li>
+              <li><Link href="/jeux"    className="text-sm hover:text-amber-400 transition-colors">Tous les jeux</Link></li>
               <li><Link href="/chatbot" className="text-sm hover:text-amber-400 transition-colors">Recommandations</Link></li>
             </ul>
           </div>
 
-          {/* Informations */}
+          {/* ── Explorer ── */}
+          <div>
+            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Explorer</p>
+            <ul className="flex flex-col gap-2">
+              {EXPLORER.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm hover:text-amber-400 transition-colors">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Jeux populaires ── */}
+          {topGames.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Jeux populaires</p>
+              <ul className="flex flex-col gap-2">
+                {topGames.map((g) => (
+                  <li key={g.slug}>
+                    <Link href={`/jeu/${g.slug}`} className="text-sm hover:text-amber-400 transition-colors">
+                      {g.nom}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* ── Informations ── */}
           <div>
             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Informations</p>
             <ul className="flex flex-col gap-2">
@@ -102,6 +153,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+
         </div>
 
         <div className="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">

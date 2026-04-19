@@ -26,6 +26,7 @@ export type Jeu = {
   complexite: Complexite;
   note: number;
   categories: string[];
+  categoryLinks?: { nom: string; slug: string }[];
   mecaniques: string[];
   regles: string[];
   pointsForts?: string[];

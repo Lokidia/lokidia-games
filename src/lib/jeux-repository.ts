@@ -21,7 +21,7 @@ type SupabaseJeu = {
   points_forts: string[] | null;
   image_url: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
-  jeux_categories: { categories: { nom: string } | null }[];
+  jeux_categories: { categories: { nom: string; slug: string } | null }[];
 };
 
 function toJeu(row: SupabaseJeu): Jeu {
@@ -53,6 +53,9 @@ function toJeu(row: SupabaseJeu): Jeu {
     pointsForts: row.points_forts ?? [],
     imageUrl:    row.image_url ?? "",
     categories:  (row.jeux_categories ?? []).map((jc) => jc.categories?.nom ?? "").filter(Boolean),
+    categoryLinks: (row.jeux_categories ?? [])
+      .filter((jc) => jc.categories?.nom && jc.categories?.slug)
+      .map((jc) => ({ nom: jc.categories!.nom, slug: jc.categories!.slug })),
     acheter: prix as unknown as AcheterJeu,
   };
 }
@@ -62,7 +65,7 @@ const JEUX_SELECT = `
   joueurs_min, joueurs_max, duree_min, duree_max, age_min,
   complexite, note, mecaniques, regles, points_forts, image_url,
   jeux_prix(marchand, url, prix),
-  jeux_categories(categories(nom))
+  jeux_categories(categories(nom, slug))
 `;
 
 export async function getAllJeux(): Promise<Jeu[]> {

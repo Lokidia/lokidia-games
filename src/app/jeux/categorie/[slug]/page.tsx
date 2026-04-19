@@ -2,6 +2,8 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lokidia.games";
 import { getJeuxByCategorie } from "@/lib/jeux-repository";
 import { createServiceClient } from "@/utils/supabase/service";
 import { getSeoPageByUrl } from "@/lib/seo/service";
@@ -60,7 +62,22 @@ export default async function CategoriePage({ params }: PageParams) {
 
   const h1 = seo?.h1 ?? `Jeux ${categorie.nom}`;
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${SITE_URL}/` },
+      { "@type": "ListItem", position: 2, name: "Jeux",    item: `${SITE_URL}/jeux` },
+      { "@type": "ListItem", position: 3, name: categorie.nom, item: `${SITE_URL}/jeux/categorie/${slug}` },
+    ],
+  };
+
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+    />
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav aria-label="Fil d'Ariane" className="flex items-center gap-2 text-sm text-gray-500 mb-6">
@@ -203,5 +220,6 @@ export default async function CategoriePage({ params }: PageParams) {
         </Link>
       </div>
     </div>
+    </>
   );
 }
