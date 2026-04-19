@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { getJeuxByCategorie } from "@/lib/jeux-repository";
 import { createServiceClient } from "@/utils/supabase/service";
 import { getSeoPageByUrl } from "@/lib/seo/service";
+import { getSeoRecordByUrlSupabase } from "@/lib/seo/supabase-repository";
 import CarteJeu from "@/components/CarteJeu";
 import type { SeoPage } from "@/lib/seo/types";
 
@@ -22,10 +23,14 @@ export async function generateStaticParams() {
 
 // Deduplicate parallel calls from generateMetadata + page component
 const loadPageData = cache(async (slug: string) => {
-  const [{ jeux, categorie }, seoRecord] = await Promise.all([
+  const canonicalUrl = `/jeux/categorie/${slug}`;
+  const [{ jeux, categorie }, supabaseSeo, fileSeo] = await Promise.all([
     getJeuxByCategorie(slug),
+    getSeoRecordByUrlSupabase(canonicalUrl),
     getSeoPageByUrl(`/jeux/${slug}`),
   ]);
+  // Supabase (new manager) takes priority over file-based (old combo system)
+  const seoRecord = supabaseSeo ?? fileSeo;
   return { jeux, categorie, seo: seoRecord?.payload_json ?? null };
 });
 
