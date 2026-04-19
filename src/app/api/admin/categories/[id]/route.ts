@@ -20,8 +20,12 @@ export async function PUT(req: Request, { params }: Params) {
 export async function PATCH(req: Request, { params }: Params) {
   const { id } = await params;
   const sb = createServiceClient();
-  const { actif } = await req.json() as { actif: boolean };
-  const { error } = await sb.from("categories").update({ actif }).eq("id", id);
+  const body = await req.json() as { actif?: boolean; position?: number };
+  const update: Record<string, unknown> = {};
+  if (body.actif !== undefined) update.actif = body.actif;
+  if (body.position !== undefined) update.position = body.position;
+  if (!Object.keys(update).length) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+  const { error } = await sb.from("categories").update(update).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
 }

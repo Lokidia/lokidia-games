@@ -28,6 +28,7 @@ export type Jeu = {
   categories: string[];
   mecaniques: string[];
   regles: string[];
+  pointsForts: string[];
   imageUrl: string;
   acheter: AcheterJeu;
 };

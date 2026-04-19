@@ -47,7 +47,7 @@ const PRIX = [
 ];
 
 const STATS = [
-  { valeur: "30",   label: "Jeux référencés" },
+  { valeur: "107",  label: "Jeux référencés" },
   { valeur: "4",    label: "Boutiques comparées" },
   { valeur: "100%", label: "Gratuit" },
   { valeur: "💬",   label: "Recommandations" },
@@ -92,7 +92,7 @@ export default async function Home() {
           </h1>
 
           <p className="text-lg text-amber-200/80 max-w-xl">
-            Fiches détaillées, règles résumées, comparateur de prix et recommandations personnalisées par intelligence artificielle.
+            Fiches détaillées, règles résumées, comparateur de prix et recommandations personnalisées.
           </p>
 
           <HeroSearchBar />

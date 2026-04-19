@@ -9,6 +9,7 @@ interface AdminCategorie {
   type: string;
   parent_id: string | null;
   actif: boolean;
+  position: number;
 }
 
 interface Props {
@@ -50,8 +51,13 @@ export default function CategoriesManager({ initialCategories }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
-  const roots = cats.filter((c) => !c.parent_id);
-  const children = (pid: string) => cats.filter((c) => c.parent_id === pid);
+  const roots = cats
+    .filter((c) => !c.parent_id)
+    .sort((a, b) => a.position - b.position || a.nom.localeCompare(b.nom));
+  const children = (pid: string) =>
+    cats
+      .filter((c) => c.parent_id === pid)
+      .sort((a, b) => a.position - b.position || a.nom.localeCompare(b.nom));
 
   function showToast(type: "success" | "error", msg: string) {
     setToast({ type, msg });
@@ -76,6 +82,41 @@ export default function CategoriesManager({ initialCategories }: Props) {
     } else {
       showToast("error", "Impossible de modifier l'état");
     }
+  }
+
+  async function moveCategory(cat: AdminCategorie, direction: "up" | "down") {
+    const siblings = cats
+      .filter((c) => c.parent_id === cat.parent_id)
+      .sort((a, b) => a.position - b.position || a.nom.localeCompare(b.nom));
+    const idx = siblings.findIndex((c) => c.id === cat.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= siblings.length) return;
+    const other = siblings[swapIdx];
+
+    const [posA, posB] = [cat.position, other.position];
+    const newPosA = posB === posA ? posA + (direction === "up" ? -1 : 1) : posB;
+    const newPosB = posA;
+
+    await Promise.all([
+      fetch(`/api/admin/categories/${cat.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ position: newPosA }),
+      }),
+      fetch(`/api/admin/categories/${other.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ position: newPosB }),
+      }),
+    ]);
+
+    setCats((p) =>
+      p.map((c) => {
+        if (c.id === cat.id) return { ...c, position: newPosA };
+        if (c.id === other.id) return { ...c, position: newPosB };
+        return c;
+      }),
+    );
   }
 
   function openEdit(cat: AdminCategorie) {
@@ -207,6 +248,20 @@ export default function CategoriesManager({ initialCategories }: Props) {
 
           {/* Actions (visible on hover) */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <button
+              onClick={() => moveCategory(cat, "up")}
+              className="p-1 rounded text-gray-400 hover:bg-amber-100 hover:text-amber-700 text-xs leading-none"
+              title="Monter"
+            >
+              ↑
+            </button>
+            <button
+              onClick={() => moveCategory(cat, "down")}
+              className="p-1 rounded text-gray-400 hover:bg-amber-100 hover:text-amber-700 text-xs leading-none"
+              title="Descendre"
+            >
+              ↓
+            </button>
             <button
               onClick={() => openCreate(cat.id)}
               className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-100 text-xs"

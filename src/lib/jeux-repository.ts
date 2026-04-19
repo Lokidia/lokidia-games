@@ -18,6 +18,7 @@ type SupabaseJeu = {
   note: number;
   mecaniques: string[];
   regles: string[];
+  points_forts: string[] | null;
   image_url: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
   jeux_categories: { categories: { nom: string } | null }[];
@@ -49,6 +50,7 @@ function toJeu(row: SupabaseJeu): Jeu {
     note:        row.note,
     mecaniques:  row.mecaniques ?? [],
     regles:      row.regles ?? [],
+    pointsForts: row.points_forts ?? [],
     imageUrl:    row.image_url ?? "",
     categories:  (row.jeux_categories ?? []).map((jc) => jc.categories?.nom ?? "").filter(Boolean),
     acheter: prix as unknown as AcheterJeu,
@@ -58,7 +60,7 @@ function toJeu(row: SupabaseJeu): Jeu {
 const JEUX_SELECT = `
   id, slug, nom, annee, description,
   joueurs_min, joueurs_max, duree_min, duree_max, age_min,
-  complexite, note, mecaniques, regles, image_url,
+  complexite, note, mecaniques, regles, points_forts, image_url,
   jeux_prix(marchand, url, prix),
   jeux_categories(categories(nom))
 `;
@@ -142,6 +144,7 @@ export async function getMenuCategories(): Promise<CategorieInfo[]> {
       .from("categories")
       .select("id, slug, nom, parent_id")
       .eq("actif", true)
+      .order("position", { nullsFirst: false })
       .order("nom");
     if (error || !data) throw error ?? new Error("empty");
     return data as CategorieInfo[];

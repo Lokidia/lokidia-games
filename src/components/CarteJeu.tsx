@@ -27,9 +27,11 @@ export default function CarteJeu({ jeu }: Props) {
         <div className="flex flex-col gap-3 p-5 pt-3 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h2 className="text-lg font-bold text-amber-900 leading-tight">{jeu.nom}</h2>
-          <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
-            ⭐ {jeu.note}/10
-          </span>
+          {jeu.note > 0 && (
+            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+              ⭐ {jeu.note}/10
+            </span>
+          )}
         </div>
 
         <p className="text-sm text-gray-600 line-clamp-2 flex-1">{jeu.description}</p>

@@ -25,6 +25,7 @@ export interface AdminJeuFull {
   note: number;
   mecaniques: string[];
   regles: string[];
+  points_forts: string[] | null;
   image_url: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
   jeux_categories: { categorie_id: string; categories: { id: string; nom: string } | null }[];
@@ -103,6 +104,10 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
   );
   const [selectedCatIds, setSelectedCatIds] = useState<Set<string>>(initCatIds);
 
+  // Points forts
+  const [pointsForts, setPointsForts] = useState<string[]>(initialData?.points_forts ?? []);
+  const [generatingPF, setGeneratingPF] = useState(false);
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -125,6 +130,29 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
     setMecInput("");
   }
 
+  async function generatePointsForts() {
+    setGeneratingPF(true);
+    try {
+      const res = await fetch("/api/admin/generate/points-forts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom, description,
+          joueurs_min: joueursMin, joueurs_max: joueursMax,
+          duree_min: dureeMin, duree_max: dureeMax,
+          complexite, mecaniques,
+        }),
+      });
+      const data = await res.json() as { points?: string[]; error?: string };
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      if (data.points) setPointsForts(data.points);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setGeneratingPF(false);
+    }
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     void save();
@@ -140,6 +168,7 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
         duree_min: Number(dureeMin), duree_max: Number(dureeMax),
         age_min: Number(ageMin), complexite, note: Number(note),
         mecaniques, regles: regles.filter((r) => r.trim()),
+        points_forts: pointsForts.filter((p) => p.trim()),
         image_url: imageUrl || null,
         prix,
         categories: Array.from(selectedCatIds),
@@ -283,6 +312,54 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
                 className="text-amber-500 hover:text-amber-900 ml-1 font-bold leading-none">×</button>
             </span>
           ))}
+        </div>
+      </section>
+
+      {/* ── Points forts ── */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">
+            Pourquoi ce jeu ? <span className="text-gray-400 font-normal normal-case">(points forts)</span>
+          </h3>
+          <button
+            type="button"
+            onClick={() => void generatePointsForts()}
+            disabled={generatingPF || !nom || !description}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-violet-100 text-violet-700 hover:bg-violet-200 disabled:opacity-50 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {generatingPF ? (
+              <><span className="animate-spin">⏳</span> Génération…</>
+            ) : (
+              <>✨ Générer avec IA</>
+            )}
+          </button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {pointsForts.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-emerald-600 font-bold shrink-0">✔</span>
+              <input
+                value={p}
+                onChange={(e) => setPointsForts((prev) => prev.map((x, j) => j === i ? e.target.value : x))}
+                className="input flex-1 text-sm"
+                placeholder={`Point fort ${i + 1}…`}
+              />
+              <button
+                type="button"
+                onClick={() => setPointsForts((prev) => prev.filter((_, j) => j !== i))}
+                className="text-gray-400 hover:text-red-500 text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setPointsForts((p) => [...p, ""])}
+            className="btn-secondary self-start mt-1"
+          >
+            + Ajouter un point
+          </button>
         </div>
       </section>
 
