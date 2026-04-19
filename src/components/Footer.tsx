@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { openConsentModal } from "@/lib/consent";
 
 const LIENS = [
   { label: "À propos", href: "/a-propos" },
@@ -68,7 +71,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Liens */}
+          {/* Navigation */}
           <div>
             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Navigation</p>
             <ul className="flex flex-col gap-2">
@@ -78,6 +81,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Informations */}
           <div>
             <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">Informations</p>
             <ul className="flex flex-col gap-2">
@@ -88,6 +92,14 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <button
+                  onClick={openConsentModal}
+                  className="text-sm text-stone-300 hover:text-amber-400 transition-colors text-left"
+                >
+                  🍪 Gérer mes préférences
+                </button>
+              </li>
             </ul>
           </div>
         </div>

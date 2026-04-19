@@ -4,6 +4,8 @@ import "./globals.css";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
+import ChatbotBubble from "@/components/ChatbotBubble";
+import AnalyticsLoader from "@/components/AnalyticsLoader";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -20,6 +22,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
         <Footer />
         <CookieBanner />
+        <AnalyticsLoader />
+        <ChatbotBubble />
       </body>
     </html>
   );
