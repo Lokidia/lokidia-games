@@ -51,6 +51,15 @@ export async function PUT(req: Request, { params }: Params) {
   return NextResponse.json({ ok: true });
 }
 
+export async function PATCH(req: Request, { params }: Params) {
+  const { slug } = await params;
+  const sb = createServiceClient();
+  const { actif } = await req.json() as { actif: boolean };
+  const { error } = await sb.from("jeux").update({ actif }).eq("slug", slug);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(_: Request, { params }: Params) {
   const { slug } = await params;
   const sb = createServiceClient();

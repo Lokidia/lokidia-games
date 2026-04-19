@@ -7,7 +7,7 @@ export default async function AdminCategoriesPage() {
   const sb = createServiceClient();
   const { data } = await sb
     .from("categories")
-    .select("id, slug, nom, type, parent_id")
+    .select("id, slug, nom, type, parent_id, actif")
     .order("nom");
 
   return (

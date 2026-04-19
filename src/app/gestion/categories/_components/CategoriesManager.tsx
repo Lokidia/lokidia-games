@@ -8,6 +8,7 @@ interface AdminCategorie {
   nom: string;
   type: string;
   parent_id: string | null;
+  actif: boolean;
 }
 
 interface Props {
@@ -62,6 +63,19 @@ export default function CategoriesManager({ initialCategories }: Props) {
     setForm(defaultForm(parentId));
     setSlugManual(false);
     setShowForm(true);
+  }
+
+  async function toggleActif(cat: AdminCategorie) {
+    const res = await fetch(`/api/admin/categories/${cat.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ actif: !cat.actif }),
+    });
+    if (res.ok) {
+      setCats((p) => p.map((c) => c.id === cat.id ? { ...c, actif: !cat.actif } : c));
+    } else {
+      showToast("error", "Impossible de modifier l'état");
+    }
   }
 
   function openEdit(cat: AdminCategorie) {
@@ -181,6 +195,15 @@ export default function CategoriesManager({ initialCategories }: Props) {
           {kids.length > 0 && (
             <span className="text-xs text-gray-400 shrink-0">{kids.length} enfant{kids.length > 1 ? "s" : ""}</span>
           )}
+
+          {/* Toggle actif */}
+          <button
+            onClick={() => toggleActif(cat)}
+            title={cat.actif ? "Désactiver" : "Activer"}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${cat.actif ? "bg-emerald-500" : "bg-gray-300"}`}
+          >
+            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${cat.actif ? "translate-x-4" : "translate-x-1"}`} />
+          </button>
 
           {/* Actions (visible on hover) */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">

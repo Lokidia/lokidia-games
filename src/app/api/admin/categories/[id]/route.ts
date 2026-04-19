@@ -17,6 +17,15 @@ export async function PUT(req: Request, { params }: Params) {
   return NextResponse.json(data);
 }
 
+export async function PATCH(req: Request, { params }: Params) {
+  const { id } = await params;
+  const sb = createServiceClient();
+  const { actif } = await req.json() as { actif: boolean };
+  const { error } = await sb.from("categories").update({ actif }).eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(_: Request, { params }: Params) {
   const { id } = await params;
   const sb = createServiceClient();

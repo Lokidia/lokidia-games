@@ -5,6 +5,7 @@ const LIENS = [
   { label: "Contact", href: "/contact" },
   { label: "Mentions légales", href: "/mentions-legales" },
   { label: "Politique de confidentialité", href: "/confidentialite" },
+  { label: "CGU", href: "/cgu" },
 ];
 
 const RESEAUX = [
@@ -49,7 +50,7 @@ export default function Footer() {
               <span>Lokidia Games</span>
             </Link>
             <p className="text-sm text-stone-400 leading-relaxed">
-              L&apos;encyclopédie des jeux de société : fiches détaillées, comparateur de prix et recommandations par IA.
+              L&apos;encyclopédie des jeux de société : fiches détaillées, règles résumées et comparateur de prix.
             </p>
             <div className="flex gap-3 mt-1">
               {RESEAUX.map((r) => (
@@ -73,7 +74,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-2">
               <li><Link href="/" className="text-sm hover:text-amber-400 transition-colors">Accueil</Link></li>
               <li><Link href="/jeux" className="text-sm hover:text-amber-400 transition-colors">Tous les jeux</Link></li>
-              <li><Link href="/chatbot" className="text-sm hover:text-amber-400 transition-colors">Recommandation IA</Link></li>
+              <li><Link href="/chatbot" className="text-sm hover:text-amber-400 transition-colors">Recommandations</Link></li>
             </ul>
           </div>
 
@@ -92,7 +93,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-stone-600">© 2024 Lokidia Games — Tous droits réservés</p>
+          <p className="text-xs text-stone-600">© 2025 Lokidia Games — Tous droits réservés</p>
           <p className="text-xs text-stone-600">
             Certains liens sont des liens affiliés. Les prix peuvent varier.
           </p>

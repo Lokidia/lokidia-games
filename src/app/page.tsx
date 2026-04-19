@@ -1,7 +1,6 @@
 import Link from "next/link";
 import HeroSearchBar from "@/components/HeroSearchBar";
 import CarteJeuFeatured from "@/components/CarteJeuFeatured";
-import NewsletterForm from "@/components/NewsletterForm";
 import { getJeuxBySlugs } from "@/lib/jeux-repository";
 
 const SLUGS_COUPS_DE_COEUR = ["pandemic", "wingspan", "carcassonne"];
@@ -48,10 +47,10 @@ const PRIX = [
 ];
 
 const STATS = [
-  { valeur: "30",     label: "Jeux référencés" },
-  { valeur: "4",      label: "Boutiques comparées" },
-  { valeur: "100%",   label: "Gratuit" },
-  { valeur: "IA",     label: "Recommandations" },
+  { valeur: "30",   label: "Jeux référencés" },
+  { valeur: "4",    label: "Boutiques comparées" },
+  { valeur: "100%", label: "Gratuit" },
+  { valeur: "💬",   label: "Recommandations" },
 ];
 
 /* ─── Page ─── */
@@ -221,33 +220,6 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════
-          SECTION 5 — NEWSLETTER
-      ════════════════════════════════════════ */}
-      <section className="bg-amber-950 py-16">
-        <div className="max-w-2xl mx-auto px-4 text-center flex flex-col items-center gap-6">
-          <div className="w-14 h-14 bg-amber-800 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
-            📬
-          </div>
-
-          <div>
-            <h2 className="text-3xl font-black text-white mb-2">Ne ratez plus aucune nouveauté</h2>
-            <p className="text-amber-300/80 text-base">
-              Sélections hebdomadaires, bons plans et nouveautés dans votre boîte mail.
-            </p>
-          </div>
-
-          <NewsletterForm />
-
-          <p className="text-xs text-amber-400/50 flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Pas de spam. Désinscription en 1 clic à tout moment.
-          </p>
         </div>
       </section>
 

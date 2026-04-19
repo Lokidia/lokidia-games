@@ -14,6 +14,7 @@ interface AdminJeuRow {
   note: number;
   image_url: string | null;
   updated_at: string;
+  actif: boolean;
   jeux_prix: { marchand: string; prix: string; url: string }[];
   jeux_categories: { categories: { id: string; nom: string } | null }[];
 }
@@ -80,6 +81,19 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
       .catch(() => null);
   }
 
+  async function toggleActif(slug: string, current: boolean) {
+    const res = await fetch(`/api/admin/jeux/${slug}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ actif: !current }),
+    });
+    if (res.ok) {
+      setJeux((p) => p.map((j) => j.slug === slug ? { ...j, actif: !current } : j));
+    } else {
+      showToast("error", "Impossible de modifier l'état");
+    }
+  }
+
   async function confirmDelete() {
     if (!deletingSlug) return;
     setDeleting(true);
@@ -138,6 +152,7 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                 <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide hidden md:table-cell">Catégories</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Complexité</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Prix min</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Statut</th>
                 <th className="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
@@ -197,6 +212,17 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                       {prixMin(jeu.jeux_prix ?? [])}
                     </td>
 
+                    {/* Statut */}
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <button
+                        onClick={() => toggleActif(jeu.slug, jeu.actif)}
+                        title={jeu.actif ? "Désactiver" : "Activer"}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${jeu.actif ? "bg-emerald-500" : "bg-gray-300"}`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${jeu.actif ? "translate-x-4" : "translate-x-1"}`} />
+                      </button>
+                    </td>
+
                     {/* Actions */}
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -221,7 +247,7 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-gray-400 text-sm">
+                  <td colSpan={7} className="px-4 py-10 text-center text-gray-400 text-sm">
                     Aucun jeu trouvé
                   </td>
                 </tr>

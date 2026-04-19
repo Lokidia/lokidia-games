@@ -125,7 +125,7 @@ export default function Navbar({ menuGroups }: Props) {
               href="/chatbot"
               className="hidden sm:flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
             >
-              💬 <span className="hidden md:inline">IA</span>
+              💬 <span className="hidden md:inline">Chatbot</span>
             </Link>
 
             {/* Hamburger mobile */}

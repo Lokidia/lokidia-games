@@ -69,6 +69,7 @@ export async function getAllJeux(): Promise<Jeu[]> {
     const { data, error } = await supabase
       .from("jeux")
       .select(JEUX_SELECT)
+      .eq("actif", true)
       .order("nom");
 
     if (error || !data) throw error ?? new Error("empty");
@@ -140,6 +141,7 @@ export async function getMenuCategories(): Promise<CategorieInfo[]> {
     const { data, error } = await sb
       .from("categories")
       .select("id, slug, nom, parent_id")
+      .eq("actif", true)
       .order("nom");
     if (error || !data) throw error ?? new Error("empty");
     return data as CategorieInfo[];
@@ -159,6 +161,7 @@ export async function getJeuxByCategorie(catSlug: string): Promise<{
       .from("categories")
       .select("id, slug, nom, parent_id")
       .eq("slug", catSlug)
+      .eq("actif", true)
       .single();
 
     if (catErr || !cat) return { jeux: [], categorie: null };
@@ -176,6 +179,7 @@ export async function getJeuxByCategorie(catSlug: string): Promise<{
       .from("jeux")
       .select(JEUX_SELECT)
       .in("id", jeuIds)
+      .eq("actif", true)
       .order("nom");
 
     if (error || !data) throw error ?? new Error("empty");

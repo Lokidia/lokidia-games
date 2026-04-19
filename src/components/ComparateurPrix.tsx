@@ -186,9 +186,14 @@ export default function ComparateurPrix({ nomJeu, acheter }: Props) {
             })}
           </div>
 
-          <p className="px-4 pb-3 text-xs text-gray-400 text-center">
-            * Prix indicatifs, liens affiliés
-          </p>
+          <div className="px-4 pb-3 flex flex-col gap-1">
+            <p className="text-xs text-gray-400 text-center">* Prix indicatifs susceptibles de varier</p>
+            {hasUrl(acheter?.amazon?.url ?? "") && (
+              <p className="text-xs text-gray-400 text-center leading-snug">
+                En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

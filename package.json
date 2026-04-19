@@ -13,7 +13,10 @@
     "fetch-bgg-images": "tsx scripts/fetch-bgg-images.ts",
     "import-bgg": "tsx scripts/import-bgg.ts",
     "clean-and-translate": "tsx scripts/clean-and-translate.ts",
-    "fix-rules": "tsx scripts/fix-rules.ts"
+    "fix-rules": "tsx scripts/fix-rules.ts",
+    "fix-amazon-tags": "tsx scripts/fix-amazon-tags.ts",
+    "fix-amazon-links": "tsx scripts/fix-amazon-links.ts",
+    "add-actif-column": "tsx scripts/add-actif-column.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
