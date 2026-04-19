@@ -1,6 +1,8 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { getJeuBySlug, getAllJeuxSlugs } from "@/lib/jeux-repository";
 import ComparateurPrix from "@/components/ComparateurPrix";
 import DescriptionExpand from "@/components/DescriptionExpand";
@@ -19,9 +21,31 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
+const loadJeu = cache(async (slug: string) => getJeuBySlug(slug));
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const jeu = await loadJeu(slug);
+  if (!jeu) return { title: "Jeu introuvable — Lokidia Games" };
+
+  const description = jeu.description
+    ? jeu.description.slice(0, 155).trimEnd() + (jeu.description.length > 155 ? "…" : "")
+    : `Découvrez ${jeu.nom} : règles, prix et avis sur Lokidia Games.`;
+
+  const title = `${jeu.nom} — Règles, prix et avis | Lokidia Games`;
+  const canonical = `/jeu/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, locale: "fr_FR", type: "article" },
+  };
+}
+
 export default async function FicheJeu({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const jeu = await getJeuBySlug(slug);
+  const jeu = await loadJeu(slug);
 
   if (!jeu) notFound();
 
@@ -68,11 +92,11 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
           <DescriptionExpand text={jeu.description} />
 
           {/* ── Pourquoi ce jeu ? ── */}
-          {jeu.pointsForts.length > 0 && (
+          {(jeu.pointsForts?.length ?? 0) > 0 && (
             <div className="bg-amber-50 rounded-2xl p-5">
               <h2 className="text-base font-bold text-amber-900 mb-3">Pourquoi ce jeu ?</h2>
               <ul className="flex flex-col gap-2">
-                {jeu.pointsForts.map((point, i) => (
+                {(jeu.pointsForts ?? []).map((point, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
                     <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✔</span>
                     {point}

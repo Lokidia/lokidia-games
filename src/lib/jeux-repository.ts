@@ -170,12 +170,21 @@ export async function getJeuxByCategorie(catSlug: string): Promise<{
     if (catErr || !cat) return { jeux: [], categorie: null };
     const catInfo = cat as CategorieInfo;
 
+    // Collect IDs: the category itself + all active child categories
+    const { data: children } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("parent_id", catInfo.id)
+      .eq("actif", true);
+
+    const catIds = [catInfo.id, ...(children ?? []).map((c: { id: string }) => c.id)];
+
     const { data: assoc } = await supabase
       .from("jeux_categories")
       .select("jeu_id")
-      .eq("categorie_id", catInfo.id);
+      .in("categorie_id", catIds);
 
-    const jeuIds = (assoc ?? []).map((a: { jeu_id: string }) => a.jeu_id);
+    const jeuIds = [...new Set((assoc ?? []).map((a: { jeu_id: string }) => a.jeu_id))];
     if (jeuIds.length === 0) return { jeux: [], categorie: catInfo };
 
     const { data, error } = await supabase

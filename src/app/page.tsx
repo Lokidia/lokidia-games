@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import HeroSearchBar from "@/components/HeroSearchBar";
 import CarteJeuFeatured from "@/components/CarteJeuFeatured";
 import { getJeuxBySlugs } from "@/lib/jeux-repository";
+
+export const metadata: Metadata = {
+  title: "Lokidia Games — Encyclopédie des jeux de société",
+  description: "Trouvez votre prochain jeu de société : fiches détaillées, règles résumées, comparateur de prix Amazon / Philibert / Cultura et recommandations personnalisées.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Lokidia Games — Encyclopédie des jeux de société",
+    description: "Fiches détaillées, règles résumées, comparateur de prix et recommandations pour choisir votre jeu de société.",
+    url: "/",
+    locale: "fr_FR",
+    type: "website",
+  },
+};
 
 const SLUGS_COUPS_DE_COEUR = ["pandemic", "wingspan", "carcassonne"];
 

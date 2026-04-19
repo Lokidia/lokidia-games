@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import FiltresEtJeux from "@/components/FiltresEtJeux";
 import { getAllJeux, getJeuxByCategorie } from "@/lib/jeux-repository";
 import type { Jeu } from "@/types/jeu";
+
+export const metadata: Metadata = {
+  title: "Tous les jeux de société — Lokidia Games",
+  description: "Parcourez notre encyclopédie de jeux de société : filtrez par catégorie, nombre de joueurs, durée ou complexité. Comparez les prix et trouvez votre prochain jeu.",
+  alternates: { canonical: "/jeux" },
+  openGraph: {
+    title: "Tous les jeux de société — Lokidia Games",
+    description: "Plus de 100 fiches jeux avec règles, prix et avis. Filtrez et comparez pour choisir le jeu parfait.",
+    url: "/jeux",
+    locale: "fr_FR",
+    type: "website",
+  },
+};
 
 export default async function JeuxPage({
   searchParams,
