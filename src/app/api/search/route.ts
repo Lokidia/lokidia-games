@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const sb = createServiceClient();
   const { data, error } = await sb
     .from("jeux")
-    .select("slug, nom, note, image_url")
+    .select("slug, nom, note, image_url, complexite, description")
     .ilike("nom", `%${q}%`)
     .eq("actif", true)
     .order("note", { ascending: false })

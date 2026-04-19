@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import JeuForm, { type AdminCategorie, type AdminJeuFull } from "./JeuForm";
+import RelationsPanel from "./RelationsPanel";
 
 interface AdminJeuRow {
   id: string;
@@ -279,6 +280,9 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                 onSaved={handleSaved}
                 onCancel={() => { setShowForm(false); setEditingJeu(null); }}
               />
+              {editingJeu && (
+                <RelationsPanel jeuSlug={editingJeu.slug} />
+              )}
             </div>
           </div>
         </div>

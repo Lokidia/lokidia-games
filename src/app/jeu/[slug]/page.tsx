@@ -4,9 +4,39 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getJeuBySlug, getAllJeuxSlugs } from "@/lib/jeux-repository";
+import { createServiceClient } from "@/utils/supabase/service";
 import ComparateurPrix from "@/components/ComparateurPrix";
 import DescriptionExpand from "@/components/DescriptionExpand";
 import { Complexite } from "@/types/jeu";
+
+interface RelatedGame {
+  id: string;
+  slug: string;
+  nom: string;
+  image_url: string | null;
+  note: number;
+}
+
+interface Relation {
+  type: string;
+  jeu_lie: RelatedGame;
+}
+
+async function getRelations(slug: string): Promise<Relation[]> {
+  try {
+    const sb = createServiceClient();
+    const { data: jeu } = await sb.from("jeux").select("id").eq("slug", slug).single();
+    if (!jeu) return [];
+    const { data } = await sb
+      .from("jeux_relations")
+      .select("type, jeu_lie:jeu_lie_id(id, slug, nom, image_url, note)")
+      .eq("jeu_id", (jeu as { id: string }).id);
+    // Supabase returns foreign keys as arrays when using the join syntax
+    return ((data ?? []) as unknown as Relation[]);
+  } catch {
+    return [];
+  }
+}
 
 function getComplexiteColor(complexite: Complexite): string {
   if (complexite === "Simple") return "text-green-500";
@@ -45,9 +75,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function FicheJeu({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const jeu = await loadJeu(slug);
+  const [jeu, relations] = await Promise.all([loadJeu(slug), getRelations(slug)]);
 
   if (!jeu) notFound();
+
+  const extensions = relations.filter((r) => r.type === "extension");
+  const similaires = relations.filter((r) => r.type === "similaire");
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -167,6 +200,61 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
           <div className="max-w-sm">
             <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />
           </div>
+
+          {/* ── Extensions disponibles ── */}
+          {extensions.length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold text-amber-900 mb-3">Extensions disponibles</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {extensions.map((r) => (
+                  <Link
+                    key={r.jeu_lie.slug}
+                    href={`/jeu/${r.jeu_lie.slug}`}
+                    className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 border border-amber-100 rounded-xl p-3 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
+                      {r.jeu_lie.image_url ? (
+                        <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
+                      ) : (
+                        <span className="flex items-center justify-center h-full text-lg">🎲</span>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-amber-900 leading-tight line-clamp-2">{r.jeu_lie.nom}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Vous aimerez aussi ── */}
+          {similaires.length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold text-amber-900 mb-3">Vous aimerez aussi</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {similaires.map((r) => (
+                  <Link
+                    key={r.jeu_lie.slug}
+                    href={`/jeu/${r.jeu_lie.slug}`}
+                    className="flex items-center gap-3 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl p-3 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 relative">
+                      {r.jeu_lie.image_url ? (
+                        <Image src={r.jeu_lie.image_url} alt={r.jeu_lie.nom} fill className="object-cover" unoptimized />
+                      ) : (
+                        <span className="flex items-center justify-center h-full text-lg">🎲</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{r.jeu_lie.nom}</p>
+                      {r.jeu_lie.note > 0 && (
+                        <p className="text-xs text-amber-600 font-bold mt-0.5">⭐ {r.jeu_lie.note}/10</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

@@ -10,6 +10,8 @@ interface SearchResult {
   nom: string;
   note: number;
   image_url: string | null;
+  complexite: string | null;
+  description: string | null;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -105,29 +107,53 @@ export default function HeroSearchBar() {
       {open && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-amber-100 overflow-hidden z-50">
           <ul>
-            {results.map((r) => (
-              <li key={r.slug}>
-                <Link
-                  href={`/jeu/${r.slug}`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-amber-50 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 shrink-0 relative">
-                    {r.image_url ? (
-                      <Image src={r.image_url} alt={r.nom} fill className="object-cover" unoptimized />
-                    ) : (
-                      <span className="flex items-center justify-center h-full text-lg">🎲</span>
-                    )}
-                  </div>
-                  <span className="flex-1 text-sm font-medium text-gray-800 truncate">{r.nom}</span>
-                  {r.note > 0 && (
-                    <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0">
-                      ⭐ {r.note}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            ))}
+            {results.map((r) => {
+              const shortDesc = r.description
+                ? r.description.slice(0, 90).trimEnd() + (r.description.length > 90 ? "…" : "")
+                : null;
+              return (
+                <li key={r.slug}>
+                  <Link
+                    href={`/jeu/${r.slug}`}
+                    onClick={() => setOpen(false)}
+                    className="flex items-start gap-3 px-4 py-3 hover:bg-amber-50 transition-colors min-h-[60px]"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 shrink-0 relative mt-0.5">
+                      {r.image_url ? (
+                        <Image src={r.image_url} alt={r.nom} fill className="object-cover" unoptimized />
+                      ) : (
+                        <span className="flex items-center justify-center h-full text-lg">🎲</span>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {/* Name + badges on same line */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-gray-900 truncate">{r.nom}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {r.note > 0 && (
+                            <span className="text-xs font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">
+                              ⭐ {r.note}
+                            </span>
+                          )}
+                          {r.complexite && (
+                            <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                              {r.complexite}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Short description below */}
+                      {shortDesc && (
+                        <p className="text-xs text-gray-400 mt-0.5 leading-snug line-clamp-1">{shortDesc}</p>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
           <Link
             href={`/jeux?q=${encodeURIComponent(query)}`}
