@@ -29,50 +29,61 @@ export default function Confidentialite() {
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-amber-900">2. Données collectées</h2>
           <p className="text-sm leading-relaxed">
-            <strong>Lokidia Games ne collecte aucune donnée personnelle sans votre consentement explicite.</strong>
+            <strong>Lokidia Games ne collecte aucune donnée personnelle sans base légale appropriée et, lorsque cela est requis, sans votre consentement explicite.</strong>
           </p>
           <p className="text-sm leading-relaxed">
-            Le site peut collecter les données suivantes uniquement si vous les fournissez volontairement :
+            Le site peut collecter les données suivantes :
           </p>
           <ul className="text-sm list-disc pl-6 space-y-1">
-            <li>Adresse e-mail (si vous utilisez le formulaire de contact ou la newsletter)</li>
+            <li>Adresse e-mail (si vous utilisez un formulaire de contact ou la newsletter)</li>
+            <li>Données de navigation et de fréquentation via Google Analytics, uniquement si vous acceptez les cookies de mesure d&apos;audience</li>
           </ul>
           <p className="text-sm leading-relaxed">
-            Ces données sont utilisées uniquement pour répondre à vos demandes et ne sont jamais revendues à des tiers.
+            Ces données sont utilisées uniquement pour répondre à vos demandes, mesurer l&apos;audience du site et améliorer son contenu et ses performances. Elles ne sont pas revendues à des tiers.
           </p>
         </section>
 
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-amber-900">3. Cookies</h2>
           <p className="text-sm leading-relaxed">
-            Ce site utilise exclusivement des <strong>cookies techniques</strong> nécessaires à son fonctionnement :
+            Le site utilise des cookies et autres traceurs :
+          </p>
+          <ul className="text-sm list-disc pl-6 space-y-1">
+            <li>Des cookies techniques strictement nécessaires au fonctionnement du site</li>
+            <li>Des cookies de mesure d&apos;audience, déposés uniquement si vous y consentez</li>
+          </ul>
+          <p className="text-sm leading-relaxed">
+            Cookies techniques utilisés :
           </p>
           <ul className="text-sm list-disc pl-6 space-y-1">
             <li><strong>cookie-consent</strong> — mémorise votre choix concernant les cookies (durée : 1 an)</li>
-            <li><strong>Cookies de session Supabase</strong> — authentification espace administrateur uniquement</li>
+            <li><strong>Cookies de session Supabase</strong> — authentification à l&apos;espace administrateur uniquement</li>
           </ul>
           <p className="text-sm leading-relaxed">
-            Aucun cookie publicitaire ou de traçage tiers (Google Analytics, Facebook Pixel, etc.) n&apos;est utilisé sur ce site.
+            Sous réserve de votre consentement, Lokidia Games utilise <strong>Google Analytics</strong>, un service de mesure d&apos;audience fourni par Google, afin d&apos;obtenir des statistiques de fréquentation et d&apos;utilisation du site.
+          </p>
+          <p className="text-sm leading-relaxed">
+            Vous pouvez accepter ou refuser ces cookies via le bandeau de consentement affiché lors de votre première visite.
           </p>
         </section>
 
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-amber-900">4. Liens affiliés et tiers</h2>
           <p className="text-sm leading-relaxed">
-            Ce site contient des liens vers des boutiques partenaires (Amazon, Philibert, Cultura, Fnac).
-            En cliquant sur ces liens, vous quittez notre site et êtes soumis à la politique de confidentialité de ces tiers.
-            Lokidia Games ne contrôle pas les pratiques de ces sites et décline toute responsabilité à leur égard.
+            Ce site contient des liens vers des boutiques partenaires (Amazon, Philibert, Cultura, Fnac). En cliquant sur ces liens, vous quittez notre site et êtes soumis à la politique de confidentialité de ces tiers. Lokidia Games ne contrôle pas les pratiques de ces sites et décline toute responsabilité à leur égard.
           </p>
           <p className="text-sm leading-relaxed">
             Les liens Amazon sont des liens affiliés dans le cadre du Programme Partenaires Amazon EU.
+          </p>
+          <p className="text-sm leading-relaxed">
+            Lorsque vous acceptez les cookies de mesure d&apos;audience, certaines données de navigation peuvent également être traitées par Google conformément à sa propre politique de confidentialité.
           </p>
         </section>
 
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-amber-900">5. Vos droits RGPD</h2>
           <p className="text-sm leading-relaxed">
-            Conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679),
-            vous disposez des droits suivants :
+            Conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679), vous disposez des droits suivants :
           </p>
           <ul className="text-sm list-disc pl-6 space-y-1">
             <li><strong>Droit d&apos;accès</strong> — connaître les données vous concernant</li>
@@ -93,15 +104,15 @@ export default function Confidentialite() {
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-amber-900">6. Sécurité</h2>
           <p className="text-sm leading-relaxed">
-            Les données sont hébergées sur des serveurs sécurisés (Vercel Inc. et Supabase Inc.) avec chiffrement HTTPS.
-            Nous mettons en œuvre les mesures techniques appropriées pour protéger vos données contre tout accès non autorisé.
+            Les données sont hébergées sur des serveurs sécurisés (Vercel Inc. et Supabase Inc.) avec chiffrement HTTPS. Nous mettons en œuvre les mesures techniques appropriées pour protéger vos données contre tout accès non autorisé.
           </p>
         </section>
 
         <p className="text-xs text-gray-400 pt-4 border-t border-gray-100">
-          Dernière mise à jour : avril 2025
+          Dernière mise à jour : avril 2026
         </p>
       </div>
     </div>
   );
 }
+
