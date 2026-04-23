@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/gestion/associations",  label: "Associations",   icon: "🔗" },
   { href: "/gestion/enrichissement",label: "Enrichissement", icon: "✅" },
   { href: "/gestion/seo",           label: "SEO",            icon: "🔍" },
+  { href: "/gestion/base-donnees",  label: "Base de données", icon: "🗄️" },
 ];
 
 export default function AdminNav() {
