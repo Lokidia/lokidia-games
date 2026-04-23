@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
   const amazonUrl = (body.amazonUrl as string | undefined) ?? "";
-  const maxItems = Math.min(Number(body.maxItems ?? 5), 50);
+  const maxItems = Math.min(Number(body.maxItems ?? 5), 200);
   const source: "amazon" | "asmodee" = body.source === "asmodee" ? "asmodee" : "amazon";
 
   if (!amazonUrl) {
@@ -48,12 +48,13 @@ export async function POST(req: NextRequest) {
   }
 
   const input = {
-    categoryOrProductUrls: [{ url: amazonUrl }],
+    categoryOrProductUrls: [{ url: amazonUrl, method: "GET", headers: { "Accept-Language": "fr-FR,fr;q=0.9" } }],
     maxItemsPerStartUrl: maxItems,
     scrapeProductDetails: true,
     locationDeliverableRoutes: ["PRODUCT", "SEARCH", "OFFERS"],
     maxConcurrency: 2,
     minConcurrency: 1,
+    proxyCountry: "FR",
   };
 
   try {

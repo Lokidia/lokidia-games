@@ -21,17 +21,31 @@ const STATE_CONFIG: Record<ProductState, { label: string; badgeColor: string; di
   error:      { label: "Erreur ❌",     badgeColor: "bg-red-100 text-red-700",                             disabled: false },
 };
 
-const QUICK_SEARCHES = [
-  { label: "Jeux de société", kw: "jeux de société" },
-  { label: "Jeux familiaux",  kw: "jeux familiaux" },
-  { label: "Jeux experts",    kw: "jeux experts stratégie" },
-  { label: "Nouveautés 2024", kw: "nouveautés jeux 2024" },
-  { label: "🏆 Top 100 Bestsellers", kw: "", url: "https://www.amazon.fr/gp/bestsellers/toys/325766031", maxItems: 100 },
+const ASMODEE_BASE = "https://www.amazon.fr/s?me=A1X6FK5RDHNB96&marketplaceID=A13V1IB3VIYZZH";
+
+const QUICK_SEARCHES_AMAZON = [
+  { label: "🎲 Jeux de société",  url: "https://www.amazon.fr/s?rh=n%3A322086011&s=review-rank&language=fr_FR", maxItems: 20 },
+  { label: "🏆 Top Bestsellers",  url: "https://www.amazon.fr/s?rh=n%3A322086011&s=review-rank&language=fr_FR", maxItems: 100 },
+  { label: "♟️ Jeux stratégie",   url: "https://www.amazon.fr/s?k=jeux+strat%C3%A9gie&rh=n%3A322086011&language=fr_FR" },
+  { label: "👨‍👩‍👧 Jeux familiaux",  url: "https://www.amazon.fr/s?k=famille&rh=n%3A322086011&language=fr_FR" },
+  { label: "🎓 Jeux experts",     url: "https://www.amazon.fr/s?k=expert&rh=n%3A322086011&language=fr_FR" },
+  { label: "🆕 Nouveautés 2025",  url: "https://www.amazon.fr/s?k=2025&rh=n%3A322086011&s=date-desc-rank&language=fr_FR" },
+];
+
+const QUICK_SEARCHES_ASMODEE = [
+  { label: "🎲 Tous les jeux",    url: `${ASMODEE_BASE}&language=fr_FR`, maxItems: 20 },
+  { label: "🆕 Nouveautés 2025",  url: `${ASMODEE_BASE}&k=2025&s=date-desc-rank&language=fr_FR` },
+  { label: "👨‍👩‍👧 Jeux familiaux",  url: `${ASMODEE_BASE}&k=famille&language=fr_FR` },
+  { label: "🎓 Jeux experts",     url: `${ASMODEE_BASE}&k=expert&language=fr_FR` },
 ];
 
 function buildAmazonUrl(kw: string, source: "amazon" | "asmodee") {
-  const base = `https://www.amazon.fr/s?k=${encodeURIComponent(kw + " jeu de société")}&i=toys`;
-  return source === "asmodee" ? `${base}&rh=p_4%3AAsmod%C3%A9e` : base;
+  if (source === "asmodee") {
+    return kw.trim()
+      ? `${ASMODEE_BASE}&k=${encodeURIComponent(kw)}&language=fr_FR`
+      : `${ASMODEE_BASE}&language=fr_FR`;
+  }
+  return `https://www.amazon.fr/s?k=${encodeURIComponent(kw + " jeu de société")}&rh=n%3A322086011&language=fr_FR`;
 }
 
 function ProductCard({ product, onStage }: { product: ProductItem; onStage: (p: ProductItem) => void }) {
@@ -87,59 +101,123 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [products, setProducts] = useState<ProductItem[]>([]);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; retrying: boolean } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const BATCH_SIZE = 5;
+  const BATCH_DELAY_MS = 3000;
+
+  function addPageToUrl(url: string, page: number): string {
+    if (page <= 1) return url;
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}page=${page}`;
+  }
+
+  async function fetchBatch(amazonUrl: string, signal: AbortSignal): Promise<ApifyProduct[]> {
+    const res = await fetch("/api/admin/apify/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amazonUrl, maxItems: BATCH_SIZE, source }),
+      signal,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Erreur Apify");
+    return (data.products ?? []) as ApifyProduct[];
+  }
 
   const search = useCallback(async (kw: string, overrideUrl?: string, overrideMax?: number) => {
     if (!kw.trim() && !overrideUrl) return;
     abortRef.current?.abort();
     abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+
     setStatus("loading");
     setErrorMsg("");
     setProducts([]);
+    setBatchProgress(null);
 
     const limit = overrideMax ?? maxItems;
+    const baseUrl = overrideUrl ?? buildAmazonUrl(kw, source);
+    const isBatchMode = limit > BATCH_SIZE;
+    const totalBatches = isBatchMode ? Math.ceil(limit / BATCH_SIZE) : 1;
 
     try {
-      const amazonUrl = overrideUrl ?? buildAmazonUrl(kw, source);
-
-      // Fetch Apify results + known ASINs in parallel
-      const [apifyRes, jeuxAsinsRes, stagingRes] = await Promise.all([
-        fetch("/api/admin/apify/search", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amazonUrl, maxItems: limit, source }),
-          signal: abortRef.current.signal,
-        }),
+      // Prefetch known ASINs in parallel with first batch
+      const [jeuxAsinsRes, stagingRes] = await Promise.all([
         fetch("/api/admin/jeux/asins"),
-        fetch("/api/admin/staging?limit=200"),
+        fetch("/api/admin/staging?limit=500"),
       ]);
-
-      const [apifyData, jeuxAsinsData, stagingData] = await Promise.all([
-        apifyRes.json(),
+      const [jeuxAsinsData, stagingData] = await Promise.all([
         jeuxAsinsRes.json(),
         stagingRes.json(),
       ]);
-
-      if (!apifyRes.ok) throw new Error(apifyData.error ?? "Erreur inconnue");
-
       const jeuxAsins = new Set<string>((jeuxAsinsData.asins ?? []) as string[]);
       const stagingAsins = new Set<string>(
         ((stagingData.items ?? []) as { asin: string | null }[])
-          .map((i) => i.asin)
-          .filter(Boolean) as string[]
+          .map((i) => i.asin).filter(Boolean) as string[]
       );
+      const seenAsins = new Set<string>();
 
-      const items: ProductItem[] = (apifyData.products as ApifyProduct[]).map((p) => {
+      function classify(p: ApifyProduct): ProductItem {
         let state: ProductState = "new";
-        if (p.asin && jeuxAsins.has(p.asin))    state = "in_jeux";
+        if (p.asin && jeuxAsins.has(p.asin))      state = "in_jeux";
         else if (p.asin && stagingAsins.has(p.asin)) state = "in_staging";
         return { ...p, state };
-      });
+      }
 
-      setProducts(items);
+      if (!isBatchMode) {
+        // Single request
+        const amazonUrl = addPageToUrl(baseUrl, 1);
+        const raw = await fetchBatch(amazonUrl, signal);
+        setProducts(raw.map(classify));
+        setStatus("done");
+        return;
+      }
+
+      // Batch mode: sequential pages with delay + 1 retry
+      for (let batch = 1; batch <= totalBatches; batch++) {
+        if (signal.aborted) break;
+        setBatchProgress({ current: batch, total: totalBatches, retrying: false });
+
+        const amazonUrl = addPageToUrl(baseUrl, batch);
+        let raw: ApifyProduct[] = [];
+
+        try {
+          raw = await fetchBatch(amazonUrl, signal);
+        } catch (err) {
+          if ((err as Error).name === "AbortError") break;
+          // 1 retry
+          setBatchProgress({ current: batch, total: totalBatches, retrying: true });
+          await new Promise((r) => setTimeout(r, 2000));
+          if (signal.aborted) break;
+          try {
+            raw = await fetchBatch(amazonUrl, signal);
+          } catch {
+            // skip this batch and continue
+          }
+        }
+
+        // Deduplicate by ASIN
+        const fresh = raw.filter((p) => !p.asin || !seenAsins.has(p.asin));
+        fresh.forEach((p) => { if (p.asin) seenAsins.add(p.asin); });
+
+        if (fresh.length > 0) {
+          setProducts((prev) => [...prev, ...fresh.map(classify)]);
+        }
+
+        // If Apify returned fewer items than requested, no more pages
+        if (raw.length < BATCH_SIZE) break;
+
+        if (batch < totalBatches && !signal.aborted) {
+          await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
+        }
+      }
+
+      setBatchProgress(null);
       setStatus("done");
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
+      setBatchProgress(null);
       setErrorMsg((err as Error).message);
       setStatus("error");
     }
@@ -178,13 +256,13 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
       <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-4 flex flex-col gap-3">
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-semibold text-gray-400">Rapide :</span>
-          {QUICK_SEARCHES.map(({ label, kw, url, maxItems: qMax }) => (
+          {(source === "asmodee" ? QUICK_SEARCHES_ASMODEE : QUICK_SEARCHES_AMAZON).map(({ label, url, maxItems: qMax }) => (
             <button
               key={label}
               onClick={() => {
-                setKeyword(kw);
+                setKeyword("");
                 if (qMax) setMaxItems(qMax);
-                search(kw, url, qMax);
+                search("", url, qMax);
               }}
               disabled={status === "loading"}
               className="px-3 py-1 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 rounded-full hover:bg-amber-100 transition-colors disabled:opacity-50">
@@ -241,12 +319,43 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">❌ {errorMsg}</div>
       )}
       {status === "loading" && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 flex items-center gap-3">
-          <svg className="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-          </svg>
-          Apify scrape Amazon + vérification des doublons en cours…
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col gap-3">
+          {batchProgress ? (
+            <>
+              <div className="flex items-center justify-between text-sm text-amber-800">
+                <span className="font-semibold flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  {batchProgress.retrying
+                    ? `Lot ${batchProgress.current}/${batchProgress.total} — nouvelle tentative…`
+                    : `Lot ${batchProgress.current}/${batchProgress.total} en cours…`}
+                </span>
+                <span className="text-xs text-amber-600">
+                  {Math.round((batchProgress.current - 1) / batchProgress.total * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-amber-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-amber-700 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.round((batchProgress.current - 1) / batchProgress.total * 100)}%` }}
+                />
+              </div>
+              {products.length > 0 && (
+                <p className="text-xs text-amber-700 font-medium">{products.length} produit{products.length > 1 ? "s" : ""} trouvé{products.length > 1 ? "s" : ""} jusqu&apos;ici</p>
+              )}
+              <p className="text-xs text-amber-600">Pause de 3 s entre chaque lot pour éviter le blocage Amazon.</p>
+            </>
+          ) : (
+            <div className="flex items-center gap-3 text-sm text-amber-800">
+              <svg className="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Chargement des ASINs existants et lancement du scraping…
+            </div>
+          )}
         </div>
       )}
       {status === "idle" && (
