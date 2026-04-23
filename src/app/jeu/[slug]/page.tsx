@@ -140,7 +140,7 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(gameJsonLd) }}
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
 
         {/* ── Breadcrumb ── */}
         <nav aria-label="Fil d'Ariane" className="flex items-center gap-1.5 text-sm text-gray-500 mb-6 flex-wrap">
@@ -150,10 +150,7 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
           {mainCat && (
             <>
               <span className="text-gray-300">›</span>
-              <Link
-                href={`/jeux/categorie/${mainCat.slug}`}
-                className="hover:text-amber-700 transition-colors"
-              >
+              <Link href={`/jeux/categorie/${mainCat.slug}`} className="hover:text-amber-700 transition-colors">
                 {mainCat.nom}
               </Link>
             </>
@@ -162,47 +159,50 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
           <span className="text-amber-800 font-semibold">{jeu.nom}</span>
         </nav>
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col gap-6">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-          {/* ── Image principale ── */}
-          <div className="relative h-64 bg-gray-100 flex items-center justify-center">
+          {/* ── Hero cinématique ── */}
+          <div className="relative w-full h-80 overflow-hidden">
             {jeu.imageUrl ? (
               <Image
                 src={jeu.imageUrl}
                 alt={jeu.nom}
                 fill
-                className="object-contain p-4"
+                className="object-cover"
                 unoptimized
                 priority
               />
             ) : (
-              <span className="text-7xl select-none">🎲</span>
+              <div className="w-full h-full bg-gray-800" />
             )}
-          </div>
-
-          <div className="px-8 pb-8 flex flex-col gap-6">
-
-            {/* ── Titre + note ── */}
-            <div className="flex items-start justify-between gap-4">
+            {/* Dégradé sombre bas → haut */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            {/* Titre + année en bas à gauche */}
+            <div className="absolute bottom-0 left-0 right-0 px-7 pb-6 flex items-end justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-amber-900">{jeu.nom}</h1>
-                <p className="text-gray-500 mt-1">{jeu.annee}</p>
+                <h1 className="text-3xl font-black text-white leading-tight drop-shadow-lg">{jeu.nom}</h1>
+                <p className="text-white/70 text-sm mt-1">{jeu.annee}</p>
               </div>
               {jeu.note > 0 && (
-                <div className="bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-xl shrink-0">
-                  {jeu.note}/10
+                <div className="flex items-center gap-1.5 bg-amber-500 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg shrink-0">
+                  <span>⭐</span>
+                  <span>{jeu.note}/10</span>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* ── Description ── */}
+          {/* ── Contenu ── */}
+          <div className="px-8 pb-8 flex flex-col gap-6 pt-6">
+
+            {/* Description */}
             <DescriptionExpand text={jeu.description} />
 
-            {/* ── Pourquoi ce jeu ? ── */}
+            {/* Pourquoi ce jeu ? */}
             {(jeu.pointsForts?.length ?? 0) > 0 && (
-              <div className="bg-amber-50 rounded-2xl p-5">
-                <h2 className="text-base font-bold text-amber-900 mb-3">Pourquoi ce jeu ?</h2>
-                <ul className="flex flex-col gap-2">
+              <div className="bg-amber-50 rounded-2xl p-4">
+                <h2 className="text-sm font-bold text-amber-900 mb-2">Pourquoi ce jeu ?</h2>
+                <ul className="flex flex-col gap-1.5">
                   {(jeu.pointsForts ?? []).map((point, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
                       <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✔</span>
@@ -213,11 +213,11 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            {/* ── Caractéristiques ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Caractéristiques */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Joueurs",    value: `${jeu.joueursMin}-${jeu.joueursMax}`,    icon: "👥" },
-                { label: "Durée",      value: `${jeu.dureeMin}-${jeu.dureeMax} min`,    icon: "⏱️" },
+                { label: "Joueurs",    value: `${jeu.joueursMin}–${jeu.joueursMax}`,   icon: "👥" },
+                { label: "Durée",      value: `${jeu.dureeMin}–${jeu.dureeMax} min`,   icon: "⏱️" },
                 { label: "Âge",        value: `${jeu.ageMin}+`,                         icon: "🎂" },
                 { label: "Complexité", value: jeu.complexite, icon: "🧠", color: getComplexiteColor(jeu.complexite) },
               ].map(({ label, value, icon, color }) => (
@@ -229,11 +229,11 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               ))}
             </div>
 
-            {/* ── Catégories & mécaniques ── */}
+            {/* Catégories & mécaniques */}
             <div className="flex flex-col gap-3">
               <div>
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Catégories</span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="flex flex-wrap gap-2 mt-1.5">
                   {(jeu.categoryLinks && jeu.categoryLinks.length > 0
                     ? jeu.categoryLinks
                     : jeu.categories.map((nom) => ({ nom, slug: "" }))
@@ -254,19 +254,21 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
                   )}
                 </div>
               </div>
-              <div>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mécaniques</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {jeu.mecaniques.map((m) => (
-                    <span key={m} className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
-                      {m}
-                    </span>
-                  ))}
+              {jeu.mecaniques.length > 0 && (
+                <div>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mécaniques</span>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {jeu.mecaniques.map((m) => (
+                      <span key={m} className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* ── Comment jouer ? ── */}
+            {/* Comment jouer ? */}
             {jeu.regles.length > 0 && (
               <div>
                 <h2 className="text-lg font-bold text-amber-900 mb-3">Comment jouer ?</h2>
@@ -283,12 +285,12 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            {/* ── Comparateur prix ── */}
+            {/* Comparateur prix */}
             <div className="max-w-sm">
               <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />
             </div>
 
-            {/* ── Extensions disponibles ── */}
+            {/* Extensions disponibles */}
             {extensions.length > 0 && (
               <div>
                 <h2 className="text-lg font-bold text-amber-900 mb-3">Extensions disponibles</h2>
@@ -313,7 +315,7 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            {/* ── Vous aimerez aussi ── */}
+            {/* Vous aimerez aussi */}
             {similaires.length > 0 && (
               <div>
                 <h2 className="text-lg font-bold text-amber-900 mb-3">Vous aimerez aussi</h2>
