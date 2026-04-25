@@ -21,7 +21,8 @@ export default function ScannerCamera() {
   const [ean, setEan]       = useState<string | null>(null);
   const [game, setGame]     = useState<FoundGame | null>(null);
   const [errMsg, setErrMsg] = useState("");
-  const stopRef = useRef<(() => void) | null>(null);
+  const stopRef  = useRef<(() => void) | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
 
   const lookup = useCallback(async (code: string) => {
     stopRef.current?.();
@@ -38,6 +39,25 @@ export default function ScannerCamera() {
     }
   }, [router]);
 
+  // Tap-to-focus: single-shot refocus at screen centre, then restore continuous.
+  const tapToFocus = useCallback(async () => {
+    const track = trackRef.current;
+    if (!track) return;
+    try {
+      await track.applyConstraints({
+        advanced: [{ focusMode: "single-shot", pointOfInterest: { x: 0.5, y: 0.5 } }],
+      } as unknown as MediaTrackConstraints);
+      // Restore continuous autofocus after the single-shot settles (~600 ms).
+      setTimeout(async () => {
+        try {
+          await track.applyConstraints({
+            advanced: [{ focusMode: "continuous" }],
+          } as unknown as MediaTrackConstraints);
+        } catch { /* no-op */ }
+      }, 600);
+    } catch { /* focusMode/pointOfInterest unsupported — no-op */ }
+  }, []);
+
   const startScanning = useCallback(async () => {
     setState("scanning");
     setEan(null);
@@ -47,38 +67,45 @@ export default function ScannerCamera() {
       const { BrowserMultiFormatReader } = await import("@zxing/browser");
       const reader = new BrowserMultiFormatReader();
 
-      // Acquire stream ourselves so we can tune focus and resolution.
-      // focusMode is not in the standard TS types but is widely supported on mobile.
+      // Acquire stream with a three-step fallback so desktop and unusual devices
+      // still work even when exact rear-camera or focus constraints are rejected.
       let stream: MediaStream;
       try {
+        // Best case: exact rear camera, high-res, autofocus, torch off.
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             width:      { ideal: 1920 },
             height:     { ideal: 1080 },
-            facingMode: "environment",
+            facingMode: { exact: "environment" },
             focusMode:  "continuous",
-            advanced:   [{ focusMode: "continuous" }],
+            torch:      false,
+            advanced:   [{ focusMode: "continuous", torch: false }],
           } as unknown as MediaTrackConstraints,
         });
       } catch {
-        // Fallback: drop focus constraints, keep rear camera + lower res
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" },
-        });
+        try {
+          // Preferred rear camera but not mandatory, no focus/torch constraints.
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" },
+          });
+        } catch {
+          // Last resort: accept any camera (desktop, front-only device).
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
       }
 
-      // Ask the track to maintain continuous autofocus after stream is live.
-      // Silently ignored when the device/browser does not support focusMode.
-      const track = stream.getVideoTracks()[0];
+      // Apply continuous autofocus to the live track; silently ignored if unsupported.
+      const track = stream.getVideoTracks()[0] ?? null;
+      trackRef.current = track;
       if (track) {
         try {
           await track.applyConstraints({
-            advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
-          });
-        } catch { /* focusMode unsupported — no-op */ }
+            advanced: [{ focusMode: "continuous" }],
+          } as unknown as MediaTrackConstraints);
+        } catch { /* no-op */ }
       }
 
-      // Hand the stream to zxing; it will set video.srcObject and start playing.
+      // Hand the stream to zxing; it sets video.srcObject and starts playback.
       const controls = await reader.decodeFromStream(
         stream,
         videoRef.current!,
@@ -92,6 +119,7 @@ export default function ScannerCamera() {
       stopRef.current = () => {
         controls.stop();
         stream.getTracks().forEach(t => t.stop());
+        trackRef.current = null;
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -118,7 +146,10 @@ export default function ScannerCamera() {
     <div className="flex flex-col items-center gap-6">
 
       {/* Viewfinder */}
-      <div className="relative w-full max-w-sm aspect-[3/4] bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+      <div
+        className={`relative w-full max-w-sm aspect-[3/4] bg-gray-900 rounded-2xl overflow-hidden shadow-2xl ${state === "scanning" ? "cursor-pointer active:brightness-75 transition-[filter]" : ""}`}
+        onClick={state === "scanning" ? tapToFocus : undefined}
+      >
         <video
           ref={videoRef}
           className={`w-full h-full object-cover ${state === "scanning" ? "opacity-100" : "opacity-30"}`}
@@ -167,6 +198,13 @@ export default function ScannerCamera() {
           </div>
         )}
       </div>
+
+      {/* Tap-to-focus hint */}
+      {state === "scanning" && (
+        <p className="text-xs text-gray-400 text-center -mt-2">
+          Appuyez sur l&apos;image pour faire la mise au point
+        </p>
+      )}
 
       {/* Actions */}
       {state === "idle" && (
