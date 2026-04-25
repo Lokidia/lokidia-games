@@ -329,6 +329,17 @@ export default function Navbar({ menuGroups }: Props) {
             {/* ── Auth (client-only pour éviter hydration mismatch) ── */}
             <NavbarUserMenu />
 
+            {/* ── Scanner mobile ── */}
+            <Link
+              href="/scanner"
+              className="lg:hidden p-2 rounded-md hover:bg-amber-700 transition-colors text-amber-100"
+              aria-label="Scanner un jeu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3m11-4v3a1 1 0 01-1 1h-3m4-11h-3a1 1 0 00-1 1v3M9 3v2m0 14v2m6-16v2m0 14v2M9 9h6v6H9z" />
+              </svg>
+            </Link>
+
             {/* ── Loupe mobile ── */}
             <button
               className="lg:hidden p-2 rounded-md hover:bg-amber-700 transition-colors text-amber-100"
