@@ -18,7 +18,8 @@
     "fix-amazon-links": "tsx scripts/fix-amazon-links.ts",
     "fetch-amazon-asins": "tsx scripts/fetch-amazon-asins.ts",
     "fix-orphan-categories": "tsx scripts/fix-orphan-categories.ts",
-    "add-actif-column": "tsx scripts/add-actif-column.ts"
+    "add-actif-column": "tsx scripts/add-actif-column.ts",
+    "generate-icons": "tsx scripts/generate-icons.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

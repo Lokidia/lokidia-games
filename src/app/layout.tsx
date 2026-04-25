@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import NavbarWrapper from "@/components/NavbarWrapper";
@@ -6,13 +6,27 @@ import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import ChatbotBubble from "@/components/ChatbotBubble";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
+import InstallPrompt from "@/components/InstallPrompt";
+import ServiceWorkerInit from "@/components/ServiceWorkerInit";
 import { createServiceClient } from "@/utils/supabase/service";
 
 const geist = Geist({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  themeColor: "#92400e",
+};
+
 export const metadata: Metadata = {
   title: "Lokidia Games — Encyclopédie des Jeux de Société",
   description: "Lokidia Games : découvrez, comparez et choisissez vos jeux de société avec l'aide de l'IA.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Lokidia",
+  },
+  icons: {
+    apple: [{ url: "/icon-192.png", sizes: "192x192" }],
+  },
 };
 
 async function getTopGames() {
@@ -42,6 +56,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <CookieBanner />
         <AnalyticsLoader />
         <ChatbotBubble />
+        <InstallPrompt />
+        <ServiceWorkerInit />
       </body>
     </html>
   );
