@@ -39,6 +39,38 @@ const SearchIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+function LokidiaIcon() {
+  return (
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 shrink-0">
+      {/* Die body */}
+      <rect width="36" height="36" rx="9" fill="#b45309" />
+      <rect width="36" height="36" rx="9" fill="url(#lokg)" opacity="0.6" />
+      {/* Die dots */}
+      <circle cx="10" cy="10" r="2.2" fill="white" fillOpacity="0.45" />
+      <circle cx="18" cy="18" r="2.2" fill="white" fillOpacity="0.25" />
+      <circle cx="26" cy="26" r="2.2" fill="white" fillOpacity="0.45" />
+      {/* LG letters */}
+      <text
+        x="18" y="24"
+        textAnchor="middle"
+        fill="white"
+        fontSize="13"
+        fontWeight="800"
+        fontFamily="system-ui,-apple-system,sans-serif"
+        letterSpacing="-0.5"
+      >
+        LG
+      </text>
+      <defs>
+        <linearGradient id="lokg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fbbf24" />
+          <stop offset="1" stopColor="#78350f" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 export default function Navbar({ menuGroups }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -177,11 +209,14 @@ export default function Navbar({ menuGroups }: Props) {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl font-bold hover:text-amber-200 transition-colors shrink-0"
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity shrink-0"
             onClick={() => setActiveMenu(null)}
           >
-            <span className="text-2xl">🎲</span>
-            <span className="hidden sm:inline">Lokidia Games</span>
+            <LokidiaIcon />
+            <span className="hidden sm:flex flex-col leading-none">
+              <span className="text-[15px] font-black tracking-tight text-white">Lokidia</span>
+              <span className="text-[10px] font-bold tracking-widest text-amber-300 uppercase">Games</span>
+            </span>
           </Link>
 
           {/* Menu desktop */}

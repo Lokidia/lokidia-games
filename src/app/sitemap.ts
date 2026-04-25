@@ -1,11 +1,20 @@
 import { MetadataRoute } from "next";
-import { jeux } from "@/data/jeux";
+import { createServiceClient } from "@/utils/supabase/service";
 import { listSeoPages } from "@/lib/seo/repository";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://lokidia.com").replace(/\/$/, "");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const seoRecords = await listSeoPages();
+  const sb = createServiceClient();
+
+  const [seoRecords, { data: jeux }] = await Promise.all([
+    listSeoPages(),
+    sb
+      .from("jeux")
+      .select("slug, updated_at")
+      .eq("actif", true)
+      .order("slug"),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -28,9 +37,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const gameRoutes: MetadataRoute.Sitemap = jeux.map((jeu) => ({
+  const gameRoutes: MetadataRoute.Sitemap = (jeux ?? []).map((jeu) => ({
     url: `${SITE_URL}/jeu/${jeu.slug}`,
-    lastModified: new Date(),
+    lastModified: jeu.updated_at ? new Date(jeu.updated_at) : new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));

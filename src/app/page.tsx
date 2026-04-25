@@ -3,6 +3,7 @@ import Link from "next/link";
 import HeroSearchBar from "@/components/HeroSearchBar";
 import CarteJeuFeatured from "@/components/CarteJeuFeatured";
 import { getJeuxBySlugs } from "@/lib/jeux-repository";
+import { createServiceClient } from "@/utils/supabase/service";
 
 export const metadata: Metadata = {
   title: "Lokidia Games — Encyclopédie des jeux de société",
@@ -60,17 +61,33 @@ const PRIX = [
   },
 ];
 
-const STATS = [
-  { valeur: "107",  label: "Jeux référencés" },
-  { valeur: "4",    label: "Boutiques comparées" },
-  { valeur: "100%", label: "Gratuit" },
-  { valeur: "💬",   label: "Recommandations" },
-];
+async function getJeuxCount(): Promise<number> {
+  try {
+    const sb = createServiceClient();
+    const { count } = await sb
+      .from("jeux")
+      .select("*", { count: "exact", head: true })
+      .eq("actif", true);
+    return count ?? 0;
+  } catch {
+    return 107;
+  }
+}
 
 /* ─── Page ─── */
 
 export default async function Home() {
-  const coupsDeCoeur = await getJeuxBySlugs(SLUGS_COUPS_DE_COEUR);
+  const [coupsDeCoeur, jeuxCount] = await Promise.all([
+    getJeuxBySlugs(SLUGS_COUPS_DE_COEUR),
+    getJeuxCount(),
+  ]);
+
+  const STATS = [
+    { valeur: String(jeuxCount), label: "Jeux référencés" },
+    { valeur: "4",               label: "Boutiques comparées" },
+    { valeur: "107+",            label: "jeux" },
+    { valeur: "Gratuit",         label: "Accès libre" },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -97,7 +114,7 @@ export default async function Home() {
         <div className="relative max-w-4xl mx-auto px-4 py-20 md:py-28 text-center flex flex-col items-center gap-8">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-amber-200 text-xs font-semibold px-4 py-1.5 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            30 jeux analysés, comparés et expliqués
+            {jeuxCount} jeux analysés, comparés et expliqués
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
