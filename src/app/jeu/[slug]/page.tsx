@@ -292,6 +292,21 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
+            {/* Ambiance sonore Spotify */}
+            {(jeu.spotifyPlaylistId ?? jeu.categorySpotifyPlaylistId) && (
+              <div>
+                <h2 className="text-lg font-bold text-amber-900 mb-3">🎵 Ambiance sonore</h2>
+                <iframe
+                  src={`https://open.spotify.com/embed/playlist/${jeu.spotifyPlaylistId ?? jeu.categorySpotifyPlaylistId}?utm_source=generator&theme=0`}
+                  width="100%"
+                  height="152"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-xl border-0"
+                />
+              </div>
+            )}
+
             {/* Comparateur prix */}
             <div className="max-w-sm">
               <ComparateurPrix nomJeu={jeu.nom} acheter={jeu.acheter} />

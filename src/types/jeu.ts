@@ -32,4 +32,6 @@ export type Jeu = {
   pointsForts?: string[];
   imageUrl: string;
   acheter: AcheterJeu;
+  spotifyPlaylistId?: string | null;
+  categorySpotifyPlaylistId?: string | null;
 };

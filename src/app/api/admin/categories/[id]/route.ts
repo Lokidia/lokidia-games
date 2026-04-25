@@ -11,7 +11,7 @@ export async function PUT(req: Request, { params }: Params) {
     .from("categories")
     .update(body)
     .eq("id", id)
-    .select("id, slug, nom, type, parent_id")
+    .select("id, slug, nom, type, parent_id, actif, position, spotify_playlist_id")
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json(data);

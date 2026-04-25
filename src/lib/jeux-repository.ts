@@ -20,8 +20,9 @@ type SupabaseJeu = {
   regles: string[];
   points_forts: string[] | null;
   image_url: string | null;
+  spotify_playlist_id: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
-  jeux_categories: { categories: { nom: string; slug: string } | null }[];
+  jeux_categories: { categories: { nom: string; slug: string; spotify_playlist_id: string | null } | null }[];
 };
 
 function toJeu(row: SupabaseJeu): Jeu {
@@ -57,15 +58,19 @@ function toJeu(row: SupabaseJeu): Jeu {
       .filter((jc) => jc.categories?.nom && jc.categories?.slug)
       .map((jc) => ({ nom: jc.categories!.nom, slug: jc.categories!.slug })),
     acheter: prix as unknown as AcheterJeu,
+    spotifyPlaylistId: row.spotify_playlist_id ?? null,
+    categorySpotifyPlaylistId:
+      (row.jeux_categories ?? []).find((jc) => jc.categories?.spotify_playlist_id)
+        ?.categories?.spotify_playlist_id ?? null,
   };
 }
 
 const JEUX_SELECT = `
   id, slug, nom, annee, description,
   joueurs_min, joueurs_max, duree_min, duree_max, age_min,
-  complexite, note, mecaniques, regles, points_forts, image_url,
+  complexite, note, mecaniques, regles, points_forts, image_url, spotify_playlist_id,
   jeux_prix(marchand, url, prix),
-  jeux_categories(categories(nom, slug))
+  jeux_categories(categories(nom, slug, spotify_playlist_id))
 `;
 
 export async function getAllJeux(): Promise<Jeu[]> {

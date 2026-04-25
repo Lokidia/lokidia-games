@@ -10,6 +10,7 @@ interface AdminCategorie {
   parent_id: string | null;
   actif: boolean;
   position: number;
+  spotify_playlist_id: string | null;
 }
 
 interface Props {
@@ -28,15 +29,21 @@ function slugify(s: string) {
     .replace(/\s+/g, "-");
 }
 
+function parseSpotifyId(input: string): string {
+  const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
+  return match ? match[1] : input;
+}
+
 interface FormState {
   nom: string;
   slug: string;
   type: string;
   parent_id: string | null;
+  spotify_input: string;
 }
 
 function defaultForm(parentId: string | null = null): FormState {
-  return { nom: "", slug: "", type: "category", parent_id: parentId };
+  return { nom: "", slug: "", type: "category", parent_id: parentId, spotify_input: "" };
 }
 
 export default function CategoriesManager({ initialCategories }: Props) {
@@ -121,7 +128,7 @@ export default function CategoriesManager({ initialCategories }: Props) {
 
   function openEdit(cat: AdminCategorie) {
     setEditingCat(cat);
-    setForm({ nom: cat.nom, slug: cat.slug, type: cat.type, parent_id: cat.parent_id });
+    setForm({ nom: cat.nom, slug: cat.slug, type: cat.type, parent_id: cat.parent_id, spotify_input: cat.spotify_playlist_id ?? "" });
     setSlugManual(true);
     setShowForm(true);
   }
@@ -134,7 +141,8 @@ export default function CategoriesManager({ initialCategories }: Props) {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { nom: form.nom, slug: form.slug, type: form.type, parent_id: form.parent_id || null };
+      const spotifyId = form.spotify_input.trim() ? parseSpotifyId(form.spotify_input.trim()) : null;
+      const payload = { nom: form.nom, slug: form.slug, type: form.type, parent_id: form.parent_id || null, spotify_playlist_id: spotifyId };
       let res: Response;
       if (editingCat) {
         res = await fetch(`/api/admin/categories/${editingCat.id}`, {
@@ -395,6 +403,15 @@ export default function CategoriesManager({ initialCategories }: Props) {
                       <option key={c.id} value={c.id}>{c.nom}</option>
                     ))}
                 </select>
+              </div>
+              <div>
+                <label className="label">Playlist Spotify <span className="text-gray-400 font-normal normal-case">(URL ou ID)</span></label>
+                <input
+                  value={form.spotify_input}
+                  onChange={(e) => setForm((p) => ({ ...p, spotify_input: e.target.value }))}
+                  className="input"
+                  placeholder="https://open.spotify.com/playlist/… ou ID"
+                />
               </div>
 
               <div className="flex gap-3 justify-end pt-2">

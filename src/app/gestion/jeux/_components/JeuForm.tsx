@@ -27,6 +27,7 @@ export interface AdminJeuFull {
   regles: string[];
   points_forts: string[] | null;
   image_url: string | null;
+  spotify_playlist_id?: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
   jeux_categories: { categorie_id: string; categories: { id: string; nom: string } | null }[];
 }
@@ -46,6 +47,11 @@ const MARCHAND_LABELS: Record<string, string> = {
   cultura: "Cultura",
   fnac: "Fnac",
 };
+
+function parseSpotifyId(input: string): string {
+  const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
+  return match ? match[1] : input;
+}
 
 function slugify(s: string) {
   return s
@@ -82,6 +88,7 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
   const [complexite, setComplexite] = useState(initialData?.complexite ?? "Simple");
   const [note, setNote] = useState(initialData?.note ?? 7);
   const [imageUrl, setImageUrl] = useState(initialData?.image_url ?? "");
+  const [spotifyInput, setSpotifyInput] = useState(initialData?.spotify_playlist_id ?? "");
 
   // Prix
   const initPrix = (): PrixMap => {
@@ -170,6 +177,7 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
         mecaniques, regles: regles.filter((r) => r.trim()),
         points_forts: pointsForts.filter((p) => p.trim()),
         image_url: imageUrl || null,
+        spotify_playlist_id: spotifyInput.trim() ? parseSpotifyId(spotifyInput.trim()) : null,
         prix,
         categories: Array.from(selectedCatIds),
       };
@@ -240,6 +248,15 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
             <input
               value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
               className="input" placeholder="https://…"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="label">Playlist Spotify <span className="text-gray-400 font-normal normal-case">(URL ou ID)</span></label>
+            <input
+              value={spotifyInput}
+              onChange={(e) => setSpotifyInput(e.target.value)}
+              className="input"
+              placeholder="https://open.spotify.com/playlist/… ou ID"
             />
           </div>
           <div className="sm:col-span-2">
