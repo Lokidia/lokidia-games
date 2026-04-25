@@ -47,8 +47,40 @@ export default function ScannerCamera() {
       const { BrowserMultiFormatReader } = await import("@zxing/browser");
       const reader = new BrowserMultiFormatReader();
 
-      const controls = await reader.decodeFromVideoDevice(
-        undefined,
+      // Acquire stream ourselves so we can tune focus and resolution.
+      // focusMode is not in the standard TS types but is widely supported on mobile.
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width:      { ideal: 1920 },
+            height:     { ideal: 1080 },
+            facingMode: "environment",
+            focusMode:  "continuous",
+            advanced:   [{ focusMode: "continuous" }],
+          } as unknown as MediaTrackConstraints,
+        });
+      } catch {
+        // Fallback: drop focus constraints, keep rear camera + lower res
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "environment" },
+        });
+      }
+
+      // Ask the track to maintain continuous autofocus after stream is live.
+      // Silently ignored when the device/browser does not support focusMode.
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        try {
+          await track.applyConstraints({
+            advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
+          });
+        } catch { /* focusMode unsupported — no-op */ }
+      }
+
+      // Hand the stream to zxing; it will set video.srcObject and start playing.
+      const controls = await reader.decodeFromStream(
+        stream,
         videoRef.current!,
         (result: unknown, _err: unknown) => {
           if (result && typeof (result as { getText?: unknown }).getText === "function") {
@@ -57,7 +89,10 @@ export default function ScannerCamera() {
         }
       );
 
-      stopRef.current = () => controls.stop();
+      stopRef.current = () => {
+        controls.stop();
+        stream.getTracks().forEach(t => t.stop());
+      };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("denied")) {
