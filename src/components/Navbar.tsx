@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import NavbarUserMenu from "./NavbarUserMenu";
 
 export interface MenuGroup {
   label: string;
@@ -120,14 +121,14 @@ export default function Navbar({ menuGroups }: Props) {
       .finally(() => setLoading(false));
   }, [debouncedQuery]);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
         setSearchFocused(false);
       }
-    }
+}
     document.addEventListener("mousedown", onMouseDown);
     return () => document.removeEventListener("mousedown", onMouseDown);
   }, []);
@@ -324,6 +325,9 @@ export default function Navbar({ menuGroups }: Props) {
               </form>
               <SearchDropdown align="right" />
             </div>
+
+            {/* ── Auth (client-only pour éviter hydration mismatch) ── */}
+            <NavbarUserMenu />
 
             {/* ── Loupe mobile ── */}
             <button

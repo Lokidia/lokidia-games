@@ -7,6 +7,7 @@ import { getJeuBySlug, getAllJeuxSlugs } from "@/lib/jeux-repository";
 import { createServiceClient } from "@/utils/supabase/service";
 import ComparateurPrix from "@/components/ComparateurPrix";
 import DescriptionExpand from "@/components/DescriptionExpand";
+import LudothequeButtons from "@/components/LudothequeButtons";
 import { Complexite } from "@/types/jeu";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lokidia.games";
@@ -194,6 +195,12 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
 
           {/* ── Contenu ── */}
           <div className="px-8 pb-8 flex flex-col gap-6 pt-6">
+
+            {/* Ludothèque */}
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Ma ludothèque</p>
+              <LudothequeButtons jeuId={jeu.id} />
+            </div>
 
             {/* Description */}
             <DescriptionExpand text={jeu.description} />

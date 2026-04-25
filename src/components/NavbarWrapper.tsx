@@ -5,13 +5,9 @@ type CatRow = { id: string; slug: string; nom: string; parent_id: string | null 
 
 function buildMenuGroups(cats: CatRow[]): MenuGroup[] {
   const idSet = new Set(cats.map((c) => c.id));
-
-  // Roots = parent_id is null OR points to an id not in this result set
   const roots = cats.filter((c) => !c.parent_id || !idSet.has(c.parent_id));
   const nonRoots = cats.filter((c) => c.parent_id && idSet.has(c.parent_id));
-
   if (roots.length === 0) return [];
-
   return roots
     .map((root) => ({
       label: root.nom,
@@ -29,7 +25,6 @@ export default async function NavbarWrapper() {
   try {
     const sb = createServiceClient();
 
-    // Try with actif + position (requires migrations to have been run)
     let { data, error } = await sb
       .from("categories")
       .select("id, slug, nom, parent_id")
@@ -37,7 +32,6 @@ export default async function NavbarWrapper() {
       .order("position", { ascending: true, nullsFirst: false })
       .order("nom");
 
-    // Fallback: columns don't exist yet — fetch without them
     if (error) {
       ({ data, error } = await sb
         .from("categories")
