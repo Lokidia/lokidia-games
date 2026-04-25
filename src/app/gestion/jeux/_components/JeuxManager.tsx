@@ -52,6 +52,7 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const [seoGenerating, setSeoGenerating] = useState<Set<string>>(new Set());
 
   const filtered = jeux.filter((j) =>
     j.nom.toLowerCase().includes(search.toLowerCase()),
@@ -92,6 +93,46 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
       setJeux((p) => p.map((j) => j.slug === slug ? { ...j, actif: !current } : j));
     } else {
       showToast("error", "Impossible de modifier l'état");
+    }
+  }
+
+  async function regenerateSeo(slug: string, nom: string) {
+    setSeoGenerating(prev => new Set(prev).add(slug));
+    try {
+      // Fetch full game data to build rich SEO context
+      const jeuRes = await fetch(`/api/admin/jeux/${slug}`);
+      if (!jeuRes.ok) throw new Error("Impossible de charger le jeu");
+      const jeu = await jeuRes.json() as AdminJeuFull;
+
+      const res = await fetch("/api/admin/seo/generate-page", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url:     `/jeu/${slug}`,
+          type:    "game",
+          context: {
+            nom:         jeu.nom,
+            description: jeu.description,
+            joueurs_min: jeu.joueurs_min,
+            joueurs_max: jeu.joueurs_max,
+            duree_min:   jeu.duree_min,
+            duree_max:   jeu.duree_max,
+            age_min:     jeu.age_min,
+            complexite:  jeu.complexite,
+            mecaniques:  jeu.mecaniques,
+          },
+          force: true,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      showToast("success", `SEO de "${nom}" régénéré`);
+    } catch (e) {
+      showToast("error", e instanceof Error ? e.message : "Erreur SEO");
+    } finally {
+      setSeoGenerating(prev => { const s = new Set(prev); s.delete(slug); return s; });
     }
   }
 
@@ -227,6 +268,14 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                     {/* Actions */}
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => regenerateSeo(jeu.slug, jeu.nom)}
+                          disabled={seoGenerating.has(jeu.slug)}
+                          title="Régénérer le SEO avec Claude"
+                          className="text-xs font-semibold px-2 py-1 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 disabled:opacity-50 transition-colors"
+                        >
+                          {seoGenerating.has(jeu.slug) ? "…" : "🔍 SEO"}
+                        </button>
                         <button
                           onClick={() => openEdit(jeu.slug)}
                           className="text-amber-600 hover:text-amber-800 transition-colors p-1.5 rounded-lg hover:bg-amber-100"

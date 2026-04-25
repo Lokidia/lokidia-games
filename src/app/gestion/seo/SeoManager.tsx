@@ -358,6 +358,8 @@ export default function SeoManager() {
   const [filter, setFilter] = useState<FilterMode>("all");
   const [search, setSearch] = useState("");
   const [editItem, setEditItem] = useState<(SiteUrlItem & { record: RecordSummary }) | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
   const abortRef = useRef(false);
 
   /* Load all pages */
@@ -437,6 +439,35 @@ export default function SeoManager() {
     setBulkRunning(false);
   }
 
+  /* Refresh list from Supabase, detect new pages */
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setRefreshMsg(null);
+    try {
+      const res = await fetch("/api/admin/seo/pages");
+      const fresh: PagesData = await res.json();
+      if (data) {
+        const knownUrls = new Set(
+          [...data.static, ...data.categories, ...data.games].map((i) => i.url),
+        );
+        const newPages = [...fresh.static, ...fresh.categories, ...fresh.games].filter(
+          (i) => !knownUrls.has(i.url),
+        );
+        setRefreshMsg(
+          newPages.length > 0
+            ? `${newPages.length} nouvelle(s) page(s) détectée(s)`
+            : "Liste à jour, aucune nouveauté",
+        );
+      }
+      setData(fresh);
+    } catch {
+      setRefreshMsg("Erreur lors de l'actualisation");
+    } finally {
+      setRefreshing(false);
+      setTimeout(() => setRefreshMsg(null), 4000);
+    }
+  }, [data]);
+
   /* Apply filters */
   function applyFilters(items: SiteUrlItem[]): SiteUrlItem[] {
     let result = items;
@@ -492,6 +523,13 @@ export default function SeoManager() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || bulkRunning}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-gray-600 border border-gray-200 hover:border-amber-400 hover:text-amber-700 rounded-xl transition-colors disabled:opacity-50"
+            >
+              {refreshing ? <Spinner /> : "🔄"} Actualiser
+            </button>
             {bulkRunning ? (
               <div className="flex items-center gap-2">
                 <button
@@ -540,6 +578,11 @@ export default function SeoManager() {
 
         {bulkError && (
           <p className="text-xs text-red-500 mt-2">⚠ {bulkError}</p>
+        )}
+        {refreshMsg && (
+          <p className={`text-xs mt-2 font-medium ${refreshMsg.includes("Erreur") ? "text-red-500" : refreshMsg.includes("aucune") ? "text-gray-500" : "text-emerald-600"}`}>
+            ✓ {refreshMsg}
+          </p>
         )}
       </div>
 

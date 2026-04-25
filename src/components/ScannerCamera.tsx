@@ -244,12 +244,12 @@ export default function ScannerCamera() {
           <p className="text-gray-600 text-sm">Code-barres <code className="bg-gray-100 px-2 py-0.5 rounded font-mono">{ean}</code> non trouvé.</p>
           <div className="flex flex-wrap gap-2 justify-center">
             <a
-              href={`https://www.amazon.fr/s?k=${encodeURIComponent(ean)}&language=fr_FR`}
+              href={`https://www.amazon.fr/s?k=${encodeURIComponent(ean)}&tag=lokidia21-21`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-amber-700 hover:bg-amber-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
             >
-              Rechercher sur Amazon
+              🛒 Rechercher sur Amazon
             </a>
             <Link
               href={`/jeux?q=${encodeURIComponent(ean)}`}

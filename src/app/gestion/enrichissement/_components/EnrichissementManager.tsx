@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import JeuForm, { type AdminCategorie, type AdminJeuFull } from "../../jeux/_components/JeuForm";
 
 interface AdminJeuEnrich {
@@ -39,6 +39,10 @@ function score(jeu: AdminJeuEnrich): number {
   return s; // max 5
 }
 
+function canEnrich(jeu: AdminJeuEnrich): boolean {
+  return !jeu.description || jeu.description.length < 50 || (jeu.regles?.length ?? 0) === 0;
+}
+
 function Check({ ok }: { ok: boolean }) {
   return (
     <span className={`text-base ${ok ? "text-emerald-500" : "text-red-400"}`}>
@@ -60,16 +64,85 @@ function PctBadge({ pct }: { pct: number }) {
 }
 
 export default function EnrichissementManager({ initialJeux }: Props) {
-  const [jeux, setJeux] = useState<AdminJeuEnrich[]>(initialJeux);
-  const [filter, setFilter] = useState<"all" | "incomplete">("all");
-  const [search, setSearch] = useState("");
-  const [editingJeu, setEditingJeu] = useState<AdminJeuFull | null>(null);
+  const [jeux, setJeux]               = useState<AdminJeuEnrich[]>(initialJeux);
+  const [filter, setFilter]           = useState<"all" | "incomplete">("all");
+  const [search, setSearch]           = useState("");
+  const [editingJeu, setEditingJeu]   = useState<AdminJeuFull | null>(null);
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const [enrichingSlug, setEnrichingSlug] = useState<string | null>(null);
+  const [toast, setToast]             = useState<{ type: "success" | "error"; msg: string } | null>(null);
+
+  // Bulk enrichment state
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, current: "" });
+  const abortBulkRef = useRef(false);
 
   function showToast(type: "success" | "error", msg: string) {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 3500);
+  }
+
+  // Patch a single jeu in local state with API result
+  function patchJeu(slug: string, updates: Partial<AdminJeuEnrich>) {
+    setJeux(prev => prev.map(j => j.slug === slug ? { ...j, ...updates } : j));
+  }
+
+  async function enrichSingle(slug: string, silent = false): Promise<boolean> {
+    setEnrichingSlug(slug);
+    try {
+      const res = await fetch("/api/admin/enrichissement/auto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      });
+      const data = await res.json() as {
+        ok?: boolean;
+        unchanged?: boolean;
+        description?: string;
+        regles?: string[];
+        mecaniques?: string[];
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Erreur");
+      if (data.unchanged) {
+        if (!silent) showToast("success", `"${slug}" déjà enrichi`);
+        return false;
+      }
+      patchJeu(slug, {
+        description: data.description,
+        regles:      data.regles,
+        mecaniques:  data.mecaniques,
+      });
+      if (!silent) showToast("success", `"${slug}" enrichi avec succès`);
+      return true;
+    } catch (e) {
+      if (!silent) showToast("error", `Erreur : ${e instanceof Error ? e.message : String(e)}`);
+      return false;
+    } finally {
+      setEnrichingSlug(null);
+    }
+  }
+
+  async function enrichAll() {
+    const targets = jeux.filter(canEnrich);
+    if (targets.length === 0) { showToast("success", "Tous les jeux sont déjà enrichis !"); return; }
+
+    abortBulkRef.current = false;
+    setBulkRunning(true);
+    setBulkProgress({ done: 0, total: targets.length, current: "" });
+
+    let enriched = 0;
+    for (let i = 0; i < targets.length; i++) {
+      if (abortBulkRef.current) break;
+      const jeu = targets[i];
+      setBulkProgress({ done: i, total: targets.length, current: jeu.nom });
+      const ok = await enrichSingle(jeu.slug, true);
+      if (ok) enriched++;
+      setBulkProgress({ done: i + 1, total: targets.length, current: jeu.nom });
+    }
+
+    setBulkRunning(false);
+    showToast("success", `Enrichissement terminé : ${enriched} jeu${enriched > 1 ? "x" : ""} mis à jour`);
   }
 
   const sorted = jeux
@@ -80,7 +153,8 @@ export default function EnrichissementManager({ initialJeux }: Props) {
     })
     .sort((a, b) => score(a) - score(b));
 
-  const nbComplete = jeux.filter((j) => score(j) === 5).length;
+  const nbComplete    = jeux.filter((j) => score(j) === 5).length;
+  const nbEnrichable  = jeux.filter(canEnrich).length;
 
   async function openEdit(jeu: AdminJeuEnrich) {
     setLoadingSlug(jeu.slug);
@@ -105,25 +179,55 @@ export default function EnrichissementManager({ initialJeux }: Props) {
       .catch(() => null);
   }
 
-  // Dummy categories for the form (will be fetched via the page but we need to pass something)
   const categories: AdminCategorie[] = (jeux
-  .flatMap((j) =>
-    (j.jeux_categories ?? []).map((jc) =>
-      jc.categories ? { id: jc.categories.id, slug: "", nom: jc.categories.nom, type: "category" as const, parent_id: null } : null,
-    ),
-  )
-  .filter((x) => x !== null) as AdminCategorie[])
-  .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
+    .flatMap((j) =>
+      (j.jeux_categories ?? []).map((jc) =>
+        jc.categories ? { id: jc.categories.id, slug: "", nom: jc.categories.nom, type: "category" as const, parent_id: null } : null,
+      ),
+    )
+    .filter((x) => x !== null) as AdminCategorie[])
+    .filter((c, i, arr) => arr.findIndex((x) => x.id === c.id) === i);
+
+  const bulkPct = bulkProgress.total > 0
+    ? Math.round((bulkProgress.done / bulkProgress.total) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Admin</p>
-        <h1 className="text-3xl font-black text-amber-950">Enrichissement des données</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {nbComplete} / {jeux.length} jeux complets (100 %)
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Admin</p>
+          <h1 className="text-3xl font-black text-amber-950">Enrichissement des données</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {nbComplete} / {jeux.length} jeux complets (100 %) · {nbEnrichable} enrichissables automatiquement
+          </p>
+        </div>
+
+        {bulkRunning ? (
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="text-sm text-gray-600 min-w-[180px]">
+              <p className="font-semibold">{bulkProgress.done}/{bulkProgress.total} traités…</p>
+              {bulkProgress.current && (
+                <p className="text-xs text-gray-400 truncate max-w-[200px]">{bulkProgress.current}</p>
+              )}
+            </div>
+            <button
+              onClick={() => { abortBulkRef.current = true; setBulkRunning(false); }}
+              className="text-sm font-semibold text-red-600 border border-red-200 hover:bg-red-50 px-3 py-2 rounded-xl transition-colors"
+            >
+              ✕ Arrêter
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={enrichAll}
+            disabled={nbEnrichable === 0}
+            className="inline-flex items-center gap-2 bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm shrink-0"
+          >
+            🤖 Enrichir automatiquement tout ({nbEnrichable})
+          </button>
+        )}
       </div>
 
       {toast && (
@@ -133,7 +237,7 @@ export default function EnrichissementManager({ initialJeux }: Props) {
       )}
 
       {/* Progress bar global */}
-      <div className="bg-white rounded-2xl border border-amber-100 p-5 shadow-sm">
+      <div className="bg-white rounded-2xl border border-amber-100 p-5 shadow-sm space-y-3">
         <div className="flex justify-between text-sm font-semibold text-amber-900 mb-2">
           <span>Complétude globale</span>
           <span>{nbComplete} / {jeux.length} jeux</span>
@@ -141,11 +245,28 @@ export default function EnrichissementManager({ initialJeux }: Props) {
         <div className="w-full bg-amber-100 rounded-full h-3 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all duration-500"
-            style={{ width: `${Math.round((nbComplete / jeux.length) * 100)}%` }}
+            style={{ width: `${Math.round((nbComplete / Math.max(jeux.length, 1)) * 100)}%` }}
           />
         </div>
-        <div className="flex gap-4 mt-3 text-xs text-gray-500">
-          <span>✅ Image &nbsp;·&nbsp; ✅ Description &nbsp;·&nbsp; ✅ Règles &nbsp;·&nbsp; ✅ Prix &nbsp;·&nbsp; ✅ Catégories</span>
+
+        {/* Bulk progress bar */}
+        {(bulkRunning || bulkProgress.done > 0) && bulkProgress.total > 0 && (
+          <div>
+            <div className="flex justify-between text-xs text-gray-500 mb-1">
+              <span>Enrichissement automatique en cours</span>
+              <span>{bulkPct}%</span>
+            </div>
+            <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                style={{ width: `${bulkPct}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="text-xs text-gray-500">
+          ✅ Image &nbsp;·&nbsp; ✅ Description &nbsp;·&nbsp; ✅ Règles &nbsp;·&nbsp; ✅ Prix &nbsp;·&nbsp; ✅ Catégories
         </div>
       </div>
 
@@ -184,19 +305,21 @@ export default function EnrichissementManager({ initialJeux }: Props) {
                 <th className="text-center px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">💰</th>
                 <th className="text-center px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">🗂️</th>
                 <th className="text-center px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">Score</th>
-                <th className="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">Action</th>
+                <th className="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-amber-50">
               {sorted.map((jeu) => {
-                const s = score(jeu);
-                const pct = Math.round((s / 5) * 100);
+                const s        = score(jeu);
+                const pct      = Math.round((s / 5) * 100);
                 const hasImage = !!jeu.image_url;
-                const hasDesc = !!(jeu.description && jeu.description.length > 50);
+                const hasDesc  = !!(jeu.description && jeu.description.length > 50);
                 const hasRegles = (jeu.regles?.length ?? 0) > 0;
-                const hasPrix = jeu.jeux_prix?.some((p) => p.url && p.prix) ?? false;
-                const hasCats = (jeu.jeux_categories?.length ?? 0) > 0;
-                const isLoading = loadingSlug === jeu.slug;
+                const hasPrix  = jeu.jeux_prix?.some((p) => p.url && p.prix) ?? false;
+                const hasCats  = (jeu.jeux_categories?.length ?? 0) > 0;
+                const isEditing   = loadingSlug === jeu.slug;
+                const isEnriching = enrichingSlug === jeu.slug;
+                const enrichable  = canEnrich(jeu);
 
                 return (
                   <tr key={jeu.slug} className="hover:bg-amber-50/40 transition-colors">
@@ -211,13 +334,27 @@ export default function EnrichissementManager({ initialJeux }: Props) {
                     <td className="px-3 py-3 text-center"><Check ok={hasCats} /></td>
                     <td className="px-3 py-3 text-center"><PctBadge pct={pct} /></td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => openEdit(jeu)}
-                        disabled={isLoading}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50 transition-colors"
-                      >
-                        {isLoading ? "…" : "✏️ Éditer"}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => enrichSingle(jeu.slug)}
+                          disabled={isEnriching || bulkRunning || !enrichable}
+                          title={enrichable ? "Générer description/règles avec Claude Haiku" : "Déjà enrichi"}
+                          className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+                            enrichable
+                              ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                              : "bg-gray-100 text-gray-400 cursor-default"
+                          }`}
+                        >
+                          {isEnriching ? "…" : "🤖 Enrichir"}
+                        </button>
+                        <button
+                          onClick={() => openEdit(jeu)}
+                          disabled={isEditing}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50 transition-colors"
+                        >
+                          {isEditing ? "…" : "✏️ Éditer"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
