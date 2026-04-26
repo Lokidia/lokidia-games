@@ -12,6 +12,8 @@ interface SearchResult {
   image_url: string | null;
   complexite: string | null;
   description: string | null;
+  match_label?: string | null;
+  match_type?: string | null;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -35,11 +37,13 @@ export default function HeroSearchBar() {
   // Fetch preview results
   useEffect(() => {
     if (debouncedQuery.length < 2) {
-      setResults([]);
-      setOpen(false);
+      queueMicrotask(() => {
+        setResults([]);
+        setOpen(false);
+      });
       return;
     }
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`)
       .then((r) => r.json())
       .then((data) => {
@@ -141,6 +145,11 @@ export default function HeroSearchBar() {
                           {r.complexite && (
                             <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
                               {r.complexite}
+                            </span>
+                          )}
+                          {r.match_label && (
+                            <span className="text-xs text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                              {r.match_label}
                             </span>
                           )}
                         </div>

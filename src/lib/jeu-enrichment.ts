@@ -28,7 +28,10 @@ export interface EnrichedData {
   complexite: string;
 }
 
-export async function enrichWithClaude(nom: string): Promise<EnrichedData> {
+export async function enrichWithClaude(nom: string, contexte = ""): Promise<EnrichedData> {
+  const contextBlock = contexte.trim()
+    ? `\nContexte source à exploiter si utile, sans copier le texte commercial :\n${contexte.slice(0, 1200)}\n`
+    : "";
   const prompt = `Tu es un expert en jeux de société. Pour le jeu "${nom}", génère en JSON strict (sans markdown) :
 {
   "description": "description en français, ~150 mots, ton enthousiaste",
@@ -47,10 +50,12 @@ Réponds uniquement avec le JSON, sans explication.`;
   const msg = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: "user", content: prompt + contextBlock }],
   });
 
-  const text = (msg.content[0] as { type: string; text: string }).text.trim();
+  const block = msg.content[0];
+  if (!block || block.type !== "text") throw new Error("Réponse Claude invalide");
+  const text = block.text.trim();
   const jsonStr = text.startsWith("{") ? text : text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
   return JSON.parse(jsonStr) as EnrichedData;
 }

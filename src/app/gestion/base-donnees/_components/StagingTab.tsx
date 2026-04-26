@@ -16,6 +16,14 @@ interface StagingItem {
   doublon_detecte: boolean;
   doublon_ref: string | null;
   jeu_id: string | null;
+  data_brute?: {
+    score?: number;
+    scoreLabel?: string;
+    raisons?: string[];
+    alertes?: string[];
+    rating?: number | null;
+    reviewsCount?: number | null;
+  } | null;
 }
 
 type ItemAction = "idle" | "publishing" | "rejecting";
@@ -215,7 +223,25 @@ export default function StagingTab() {
                     {item.asin && <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">{item.asin}</span>}
                     <span className="capitalize">{item.source}</span>
                     <span>{new Date(item.date_scraping).toLocaleDateString("fr-FR")}</span>
+                    {typeof item.data_brute?.score === "number" && (
+                      <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                        score {item.data_brute.score}
+                      </span>
+                    )}
+                    {item.data_brute?.reviewsCount && (
+                      <span>{item.data_brute.reviewsCount} avis</span>
+                    )}
                   </div>
+                  {item.data_brute?.raisons && item.data_brute.raisons.length > 0 && (
+                    <p className="text-xs text-emerald-700">
+                      {item.data_brute.raisons.slice(0, 4).join(" • ")}
+                    </p>
+                  )}
+                  {item.data_brute?.alertes && item.data_brute.alertes.length > 0 && (
+                    <p className="text-xs text-orange-600">
+                      {item.data_brute.alertes.join(" • ")}
+                    </p>
+                  )}
                   {item.doublon_detecte && (
                     <p className="text-xs text-amber-600">⚠️ Doublon : {item.doublon_ref}</p>
                   )}

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const sb = createServiceClient();
   let query = sb
     .from("jeux_staging")
-    .select("id, nom, asin, prix, image_url, url_amazon, source, statut, date_scraping, doublon_detecte, doublon_ref, jeu_id")
+    .select("id, nom, asin, prix, image_url, url_amazon, source, statut, date_scraping, doublon_detecte, doublon_ref, jeu_id, data_brute")
     .order("date_scraping", { ascending: false })
     .limit(limit);
 

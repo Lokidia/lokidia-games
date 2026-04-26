@@ -6,6 +6,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 const LOGIN_PATH = "/gestion/login";
+const ADMIN_API_PATH = "/api/admin";
+const ADMIN_SESSION_MAX_AGE = 8 * 60 * 60;
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -31,10 +33,10 @@ export async function proxy(request: NextRequest) {
 
   await supabase.auth.getUser();
 
-  // ── 2. Admin guard for /gestion routes ───────────────────────────────────
-  if (pathname.startsWith("/gestion")) {
-    // Login page and internal gestion API: pass through (no redirect loop)
-    if (pathname.startsWith(LOGIN_PATH) || pathname.startsWith("/api/gestion/")) {
+  // ── 2. Admin guard for /gestion pages and /api/admin routes ──────────────
+  if (pathname.startsWith("/gestion") || pathname.startsWith(ADMIN_API_PATH)) {
+    // Login page: pass through (no redirect loop)
+    if (pathname.startsWith(LOGIN_PATH)) {
       const headers = new Headers(request.headers);
       headers.set("x-pathname", pathname);
       const res = NextResponse.next({ request: { headers } });
@@ -47,6 +49,10 @@ export async function proxy(request: NextRequest) {
     const email = await verifySessionToken(token);
 
     if (!email) {
+      if (pathname.startsWith(ADMIN_API_PATH)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = LOGIN_PATH;
       loginUrl.search = `?from=${encodeURIComponent(pathname)}`;
@@ -59,6 +65,12 @@ export async function proxy(request: NextRequest) {
     headers.set("x-admin-email", email);
     const res = NextResponse.next({ request: { headers } });
     supabaseResponse.cookies.getAll().forEach(({ name, value }) => res.cookies.set(name, value));
+    res.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: ADMIN_SESSION_MAX_AGE,
+    });
     return res;
   }
 

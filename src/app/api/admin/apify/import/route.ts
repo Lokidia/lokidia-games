@@ -28,7 +28,13 @@ export async function POST(req: NextRequest) {
 
   let enriched;
   try {
-    enriched = await enrichWithClaude(body.nom as string);
+    const scrapeContext = [
+      body.description,
+      Array.isArray(body.raisons) ? `Signaux qualité : ${body.raisons.join(", ")}` : "",
+      body.rating ? `Note Amazon : ${body.rating}/5` : "",
+      body.reviewsCount ? `Avis Amazon : ${body.reviewsCount}` : "",
+    ].filter(Boolean).join("\n");
+    enriched = await enrichWithClaude(body.nom as string, scrapeContext);
   } catch {
     enriched = {
       description: "",

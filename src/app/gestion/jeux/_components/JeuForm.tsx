@@ -115,18 +115,32 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
   const [pointsForts, setPointsForts] = useState<string[]>(initialData?.points_forts ?? []);
   const [generatingPF, setGeneratingPF] = useState(false);
 
+  // Règles IA
+  const [generatingRegles, setGeneratingRegles] = useState(false);
+
+  // Auto-catégorisation
+  const [generatingCats, setGeneratingCats] = useState(false);
+  const [catSuggestions, setCatSuggestions] = useState<{ id: string; nom: string }[] | null>(null);
+  const [catSuggestSelected, setCatSuggestSelected] = useState<Set<string>>(new Set());
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Auto-slug from nom
   useEffect(() => {
-    if (!slugManual) setSlug(slugify(nom));
+    if (!slugManual) {
+      queueMicrotask(() => setSlug(slugify(nom)));
+    }
   }, [nom, slugManual]);
 
   function toggleCat(id: string) {
     setSelectedCatIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -158,6 +172,73 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
     } finally {
       setGeneratingPF(false);
     }
+  }
+
+  async function generateRegles() {
+    setGeneratingRegles(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/generate/regles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nom, description, mecaniques }),
+      });
+      const data = await res.json() as { regles?: string[]; error?: string };
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      if (data.regles) setRegles(data.regles);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setGeneratingRegles(false);
+    }
+  }
+
+  async function autoCategories() {
+    setGeneratingCats(true);
+    setCatSuggestions(null);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/generate/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom, description, mecaniques,
+          categories: categories.map((c) => ({ id: c.id, nom: c.nom })),
+        }),
+      });
+      const data = await res.json() as { ids?: string[]; error?: string };
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      const suggested = (data.ids ?? [])
+        .map((id) => categories.find((c) => c.id === id))
+        .filter(Boolean) as AdminCategorie[];
+      setCatSuggestions(suggested);
+      setCatSuggestSelected(new Set(suggested.map((c) => c.id)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setGeneratingCats(false);
+    }
+  }
+
+  function applyCatSuggestions() {
+    setSelectedCatIds((prev) => {
+      const next = new Set(prev);
+      catSuggestSelected.forEach((id) => next.add(id));
+      return next;
+    });
+    setCatSuggestions(null);
+  }
+
+  function toggleCatSuggestion(id: string) {
+    setCatSuggestSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -382,9 +463,23 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
 
       {/* ── Règles ── */}
       <section>
-        <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest mb-4">
-          Règles du jeu
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">
+            Règles du jeu
+          </h3>
+          <button
+            type="button"
+            onClick={() => void generateRegles()}
+            disabled={generatingRegles || !nom}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-violet-100 text-violet-700 hover:bg-violet-200 disabled:opacity-50 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {generatingRegles ? (
+              <><span className="animate-spin">⏳</span> Génération…</>
+            ) : (
+              <>✨ Générer avec IA</>
+            )}
+          </button>
+        </div>
         <div className="flex flex-col gap-2">
           {regles.map((r, i) => (
             <div key={i} className="flex gap-2 items-start">
@@ -442,9 +537,85 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
 
       {/* ── Catégories ── */}
       <section>
-        <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest mb-4">
-          Catégories ({selectedCatIds.size} sélectionnée{selectedCatIds.size > 1 ? "s" : ""})
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest">
+            Catégories ({selectedCatIds.size} sélectionnée{selectedCatIds.size > 1 ? "s" : ""})
+          </h3>
+          <button
+            type="button"
+            onClick={() => void autoCategories()}
+            disabled={generatingCats || !nom || categories.length === 0}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-violet-100 text-violet-700 hover:bg-violet-200 disabled:opacity-50 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {generatingCats ? (
+              <><span className="animate-spin">⏳</span> Analyse…</>
+            ) : (
+              <>✨ Suggérer avec IA</>
+            )}
+          </button>
+        </div>
+
+        {catSuggestions && (
+          <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-sm font-bold text-violet-900">Suggestions IA</p>
+                <p className="text-xs text-violet-700">
+                  Vérifie les catégories avant de les ajouter au jeu.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCatSuggestions(null)}
+                className="text-violet-400 hover:text-violet-700 text-xl leading-none"
+                aria-label="Fermer les suggestions"
+              >
+                ×
+              </button>
+            </div>
+
+            {catSuggestions.length === 0 ? (
+              <p className="text-sm text-violet-700">Aucune catégorie pertinente trouvée.</p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {catSuggestions.map((cat) => (
+                    <label
+                      key={cat.id}
+                      className="inline-flex items-center gap-2 rounded-full bg-white border border-violet-200 px-3 py-1.5 text-sm text-violet-900 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={catSuggestSelected.has(cat.id)}
+                        onChange={() => toggleCatSuggestion(cat.id)}
+                        className="accent-violet-600"
+                      />
+                      {cat.nom}
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={applyCatSuggestions}
+                    disabled={catSuggestSelected.size === 0}
+                    className="btn-primary disabled:opacity-50"
+                  >
+                    Appliquer la sélection
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCatSuggestSelected(new Set(catSuggestions.map((cat) => cat.id)))}
+                    className="btn-secondary"
+                  >
+                    Tout sélectionner
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto border border-amber-100 rounded-xl p-4">
           {roots.map((root) => (
             <div key={root.id}>

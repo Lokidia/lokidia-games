@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    path:     "/gestion",
+    path:     "/",
     maxAge:   8 * 60 * 60,
-    // secure: true  ← enable in production (HTTPS)
+    secure:   process.env.NODE_ENV === "production",
   });
 
   return res;

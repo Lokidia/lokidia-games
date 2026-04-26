@@ -22,6 +22,18 @@ const STATE_CONFIG: Record<ProductState, { label: string; badgeColor: string; di
 };
 
 const ASMODEE_BASE = "https://www.amazon.fr/s?me=A1X6FK5RDHNB96&marketplaceID=A13V1IB3VIYZZH";
+const POPULAR_QUERIES = [
+  "meilleures ventes jeux de société",
+  "jeux de société populaires famille",
+  "jeux de société stratégie populaires",
+  "nouveautés jeux de société",
+];
+
+const SCORE_BADGE: Record<ApifyProduct["scoreLabel"], string> = {
+  excellent: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  bon: "bg-blue-100 text-blue-700 border border-blue-200",
+  moyen: "bg-amber-100 text-amber-700 border border-amber-200",
+};
 
 function buildAmazonUrl(nom: string, source: "amazon" | "asmodee"): string {
   if (source === "asmodee") {
@@ -50,7 +62,26 @@ function ProductCard({ product, onStage }: { product: ProductItem; onStage: (p: 
         <div className="flex items-center justify-between text-xs text-gray-500 gap-2 flex-wrap">
           {product.prix && <span className="font-bold text-amber-700">{product.prix}</span>}
           {product.asin && <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">{product.asin}</span>}
+          <span className={`px-1.5 py-0.5 rounded-full font-semibold ${SCORE_BADGE[product.scoreLabel]}`}>
+            {product.score}/100
+          </span>
         </div>
+        {(product.rating || product.reviewsCount) && (
+          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+            {product.rating && <span>{product.rating.toFixed(1)}/5</span>}
+            {product.reviewsCount && <span>{product.reviewsCount} avis</span>}
+          </div>
+        )}
+        {product.raisons.length > 0 && (
+          <p className="text-[11px] text-emerald-700 line-clamp-2">
+            {product.raisons.slice(0, 3).join(" • ")}
+          </p>
+        )}
+        {product.alertes.length > 0 && (
+          <p className="text-[11px] text-orange-600 line-clamp-2">
+            {product.alertes.join(" • ")}
+          </p>
+        )}
         {product.url && (
           <a href={product.url} target="_blank" rel="noopener noreferrer"
             className="text-xs text-blue-600 hover:underline truncate">
@@ -101,7 +132,7 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
         fetch("/api/admin/apify/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amazonUrl, maxItems: 5, source }),
+          body: JSON.stringify({ amazonUrl, query: nom.trim(), maxItems: 20, source }),
           signal,
         }),
         fetch("/api/admin/jeux/asins"),
@@ -150,6 +181,7 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
           prix: product.prix,
           image: product.image,
           url: product.url,
+          description: product.raisons.join(" • "),
           source,
           data_brute: product,
         }),
@@ -171,7 +203,9 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
       <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-5 flex flex-col gap-3 max-w-lg">
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1">Nom du jeu</label>
-          <p className="text-xs text-gray-400 mb-2">Tapez le nom exact du jeu pour trouver la bonne fiche Amazon.</p>
+          <p className="text-xs text-gray-400 mb-2">
+            Tapez un jeu, une catégorie ou une recherche populaire. Les accessoires et faux positifs sont filtrés.
+          </p>
           <div className="flex gap-2">
             <input
               type="text"
@@ -210,6 +244,20 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
             🏢 Recherche limitée à la boutique officielle Asmodée sur Amazon.fr
           </p>
         )}
+        {source === "amazon" && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {POPULAR_QUERIES.map((query) => (
+              <button
+                key={query}
+                type="button"
+                onClick={() => setNom(query)}
+                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+              >
+                {query}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {status === "error" && (
@@ -245,6 +293,9 @@ export default function ScrapingTab({ source }: { source: "amazon" | "asmodee" }
                 {STATE_CONFIG[s].label}
               </span>
             ))}
+            <span className="px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+              triés par pertinence
+            </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {products.map((p) => (

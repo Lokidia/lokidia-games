@@ -29,6 +29,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     prix: string | null;
     image_url: string | null;
     url_amazon: string | null;
+    description_brute: string | null;
+    data_brute: { raisons?: string[]; alertes?: string[]; rating?: number; reviewsCount?: number } | null;
     source: string;
     annee?: number;
   };
@@ -51,7 +53,13 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   // Enrich with Claude
   let enriched;
   try {
-    enriched = await enrichWithClaude(row.nom);
+    const scrapeContext = [
+      row.description_brute,
+      row.data_brute?.raisons?.length ? `Signaux qualité : ${row.data_brute.raisons.join(", ")}` : "",
+      row.data_brute?.rating ? `Note Amazon : ${row.data_brute.rating}/5` : "",
+      row.data_brute?.reviewsCount ? `Avis Amazon : ${row.data_brute.reviewsCount}` : "",
+    ].filter(Boolean).join("\n");
+    enriched = await enrichWithClaude(row.nom, scrapeContext);
   } catch {
     enriched = {
       description: "",

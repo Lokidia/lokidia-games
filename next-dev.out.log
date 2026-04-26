@@ -1,0 +1,18 @@
+
+> encyclopedie-jeux@0.1.0 dev
+> next dev --hostname 127.0.0.1
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env.local
+✓ Ready in 484ms
+Creating turbopack project {
+  dir: 'C:\\Users\\33601\\Desktop\\Projet IA JeuxSo\\encyclopedie-jeux',
+  testMode: true
+}
+
+ GET /manifest.webmanifest 200 in 479ms (next.js: 319ms, proxy.ts: 146ms, application-code: 14ms)
+ GET /gestion/base-donnees 200 in 4.0s (next.js: 2.6s, proxy.ts: 284ms, application-code: 1132ms)
+ GET / 200 in 1552ms (next.js: 677ms, proxy.ts: 93ms, application-code: 782ms)
+ GET /manifest.webmanifest 200 in 34ms (next.js: 17ms, proxy.ts: 10ms, application-code: 6ms)

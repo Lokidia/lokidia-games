@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
   res.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",
+    path:     "/",
+    maxAge:   0,
+  });
+  res.cookies.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
     path:     "/gestion",
     maxAge:   0,
   });

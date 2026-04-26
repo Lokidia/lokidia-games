@@ -65,11 +65,34 @@ function appliquerFiltres(jeux: Jeu[], filtres: EtatFiltres, recherche: string):
     // Recherche textuelle
     if (recherche.trim()) {
       const q = recherche.toLowerCase();
+      const qNormalized = q
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/œ/g, "oe")
+        .replace(/æ/g, "ae");
+      const normalize = (value: string) =>
+        value
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/œ/g, "oe")
+          .replace(/æ/g, "ae");
+      const matchPlayers =
+        (/\b(2|deux|duo|couple)\b/.test(qNormalized) && jeu.joueursMin <= 2 && jeu.joueursMax >= 2) ||
+        (/\b(solo|1 joueur|seul)\b/.test(qNormalized) && jeu.joueursMin <= 1 && jeu.joueursMax >= 1) ||
+        (/\b(5\+|5 joueurs|6 joueurs|amis|groupe|grande tablee)\b/.test(qNormalized) && jeu.joueursMax >= 5);
+      const matchDuration =
+        (/\b(rapide|court|apero|15 min|20 min|30 min|moins de 30)\b/.test(qNormalized) && jeu.dureeMin <= 30) ||
+        (/\b(45 min|60 min|1h|une heure)\b/.test(qNormalized) && jeu.dureeMax >= 30 && jeu.dureeMin <= 75) ||
+        (/\b(long|2h|3h|marathon)\b/.test(qNormalized) && jeu.dureeMax >= 120);
       const match =
-        jeu.nom.toLowerCase().includes(q) ||
-        jeu.description.toLowerCase().includes(q) ||
-        jeu.categories.some((c) => c.toLowerCase().includes(q)) ||
-        jeu.mecaniques.some((m) => m.toLowerCase().includes(q));
+        normalize(jeu.nom).includes(qNormalized) ||
+        normalize(jeu.description).includes(qNormalized) ||
+        normalize(jeu.complexite).includes(qNormalized) ||
+        jeu.categories.some((c) => normalize(c).includes(qNormalized)) ||
+        jeu.mecaniques.some((m) => normalize(m).includes(qNormalized)) ||
+        matchPlayers ||
+        matchDuration;
       if (!match) return false;
     }
 

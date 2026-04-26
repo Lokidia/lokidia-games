@@ -23,6 +23,7 @@ interface SearchResult {
   image_url: string | null;
   complexite: string | null;
   description: string | null;
+  match_label?: string | null;
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -106,11 +107,13 @@ export default function Navbar({ menuGroups }: Props) {
   // Fetch search results
   useEffect(() => {
     if (debouncedQuery.length < 2) {
-      setResults([]);
-      setDropdownOpen(false);
+      queueMicrotask(() => {
+        setResults([]);
+        setDropdownOpen(false);
+      });
       return;
     }
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`)
       .then((r) => r.json())
       .then((data) => {
@@ -156,7 +159,7 @@ export default function Navbar({ menuGroups }: Props) {
     setDropdownOpen(false);
   };
 
-  const SearchDropdown = ({ align = "right" }: { align?: "right" | "left" }) => (
+  const renderSearchDropdown = (align: "right" | "left" = "right") => (
     dropdownOpen && results.length > 0 ? (
       <div className={`absolute top-full ${align === "right" ? "right-0" : "left-0"} mt-2 w-80 bg-white rounded-xl shadow-2xl border border-amber-100 overflow-hidden z-[200]`}>
         <ul>
@@ -183,9 +186,15 @@ export default function Navbar({ menuGroups }: Props) {
                       </span>
                     )}
                   </div>
-                  {r.complexite && (
-                    <span className="text-xs text-gray-400">{r.complexite}</span>
-                  )}
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    {r.complexite && <span>{r.complexite}</span>}
+                    {r.match_label && (
+                      <>
+                        {r.complexite && <span>•</span>}
+                        <span className="text-emerald-600">{r.match_label}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </Link>
             </li>
@@ -323,7 +332,7 @@ export default function Navbar({ menuGroups }: Props) {
                   />
                 </div>
               </form>
-              <SearchDropdown align="right" />
+              {renderSearchDropdown("right")}
             </div>
 
             {/* ── Auth (client-only pour éviter hydration mismatch) ── */}
@@ -401,7 +410,7 @@ export default function Navbar({ menuGroups }: Props) {
                 />
               </div>
             </form>
-            <SearchDropdown align="left" />
+            {renderSearchDropdown("left")}
           </div>
         </div>
       )}
