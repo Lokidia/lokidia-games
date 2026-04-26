@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     httpOnly: true,
     sameSite: "lax",
     path:     "/",
-    maxAge:   8 * 60 * 60,
+    maxAge:   30 * 24 * 60 * 60,
     secure:   process.env.NODE_ENV === "production",
   });
 

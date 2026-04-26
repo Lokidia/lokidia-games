@@ -8,6 +8,7 @@ import ChatbotBubble from "@/components/ChatbotBubble";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
 import InstallPrompt from "@/components/InstallPrompt";
 import ServiceWorkerInit from "@/components/ServiceWorkerInit";
+import ScrollToTop from "@/components/ScrollToTop";
 import { createServiceClient } from "@/utils/supabase/service";
 
 const geist = Geist({ subsets: ["latin"] });
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Footer topGames={topGames} />
         <CookieBanner />
         <AnalyticsLoader />
+        <ScrollToTop />
         <ChatbotBubble />
         <InstallPrompt />
         <ServiceWorkerInit />

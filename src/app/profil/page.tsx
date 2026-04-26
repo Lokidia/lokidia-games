@@ -17,7 +17,6 @@ const VALID_TABS: Tab[] = ["profil", "ludotheque", "wishlist", "amis", "parties"
 const STATUT_LABELS: Record<string, string> = {
   possede: "📚 Possédé",
   souhaite: "❤️ Souhaité",
-  joue: "🎮 Joué",
 };
 
 type LudoItem = { statut: string; jeux: { slug: string; nom: string } | null };
@@ -69,7 +68,6 @@ export default async function ProfilPage({
 
   const possede  = items.filter(i => i.statut === "possede");
   const souhaite = items.filter(i => i.statut === "souhaite");
-  const joue     = items.filter(i => i.statut === "joue");
 
   // ── Fetch wishlist prices (only when needed) ──────────────────────────────
   let wishItems: WishItem[] = [];
@@ -245,8 +243,7 @@ export default async function ProfilPage({
                 ) : (
                   <>
                     {[
-                      { statut: "possede", label: "Possédés", list: possede },
-                      { statut: "joue",    label: "En train de jouer", list: joue },
+                      { statut: "possede",  label: "Possédés", list: possede },
                       { statut: "souhaite", label: "Souhaités", list: souhaite },
                     ].map(({ statut, label, list }) =>
                       list.length > 0 ? (

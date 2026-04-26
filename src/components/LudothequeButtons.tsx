@@ -4,12 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
-type Statut = "possede" | "souhaite" | "joue";
+type Statut = "possede" | "souhaite";
 
 const BUTTONS: { statut: Statut; label: string; activeClass: string }[] = [
-  { statut: "possede", label: "📚 J'ai ce jeu",  activeClass: "bg-amber-700 text-white border-amber-700" },
+  { statut: "possede",  label: "📚 J'ai ce jeu", activeClass: "bg-amber-700 text-white border-amber-700" },
   { statut: "souhaite", label: "❤️ Je le veux",  activeClass: "bg-rose-600 text-white border-rose-600" },
-  { statut: "joue",    label: "🎮 J'y joue",     activeClass: "bg-emerald-700 text-white border-emerald-700" },
 ];
 
 export default function LudothequeButtons({ jeuId }: { jeuId: string }) {
