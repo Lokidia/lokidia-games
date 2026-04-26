@@ -1,15 +1,18 @@
 /**
  * scripts/fetch-ean.ts
  *
- * Pour chaque jeu dans Supabase sans EAN :
- *   1. Cherche l'EAN via l'URL Amazon (ASIN → recherche UPCitemdb)
- *   2. Sinon, cherche via le nom du jeu sur UPCitemdb
- *   3. Sauvegarde dans jeux.ean
+ * Pour chaque jeu dans Supabase sans EAN, cherche en cascade :
+ *   1. UPCitemdb par ASIN Amazon (si URL Amazon présente)
+ *   2. UPCitemdb par nom du jeu
+ *   3. UPCitemdb par nom + "jeu de société"
+ *   4. Apify Google Shopping Scraper (si APIFY_KEY défini)
+ *   5. Sauvegarde dans jeux.ean
  *
  * Run: npm run fetch-ean
  *
- * Note : l'API UPCitemdb trial est limitée à 100 req/jour sans clé.
- *        Définir UPCITEMDB_KEY dans .env.local pour lever cette limite.
+ * Variables d'environnement optionnelles :
+ *   UPCITEMDB_KEY  — clé API UPCitemdb (trial sans clé : 100 req/jour)
+ *   APIFY_KEY      — token Apify pour Google Shopping (dernier recours)
  */
 
 import { loadEnvConfig } from "@next/env";
@@ -20,6 +23,7 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const UPCITEMDB_KEY = process.env.UPCITEMDB_KEY ?? "";
+const APIFY_KEY     = process.env.APIFY_KEY ?? "";
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("❌  Variables Supabase manquantes");
@@ -32,15 +36,11 @@ const RATE_MS = 1500;
 
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Extracts ASIN from an Amazon URL, e.g. /dp/B07XYZ → B07XYZ */
 function extractAsin(url: string): string | null {
   const m = url.match(/\/dp\/([A-Z0-9]{10})/i);
   return m ? m[1] : null;
 }
 
-/** Normalize a game name for better search results */
 function normalize(nom: string): string {
   return nom
     .replace(/\s*[-–:]\s*(vf|version française|jeu de société|board game).*/i, "")
@@ -48,52 +48,59 @@ function normalize(nom: string): string {
     .trim();
 }
 
-interface UPCItem {
-  ean: string;
-  title: string;
-  category?: string;
-}
-interface UPCResponse {
-  code: string;
-  items?: UPCItem[];
-}
+interface UPCItem { ean: string; title: string; category?: string }
+interface UPCResponse { code: string; items?: UPCItem[] }
 
-/** Search UPCitemdb by query string. Returns the first EAN found, or null. */
 async function searchUPC(query: string): Promise<string | null> {
   const base = "https://api.upcitemdb.com/prod/trial/search";
   const params = new URLSearchParams({ s: query, type: "product" });
-  const headers: Record<string, string> = { "Accept": "application/json" };
+  const headers: Record<string, string> = { Accept: "application/json" };
   if (UPCITEMDB_KEY) headers["user_key"] = UPCITEMDB_KEY;
 
   try {
     const res = await fetch(`${base}?${params}`, { headers });
-    if (res.status === 429) { console.warn("    ⚠  Rate-limit UPCitemdb — attente 10s"); await sleep(10_000); return null; }
+    if (res.status === 429) {
+      console.warn("    ⚠  Rate-limit UPCitemdb — attente 10s");
+      await sleep(10_000);
+      return null;
+    }
     if (!res.ok) return null;
-
     const data = await res.json() as UPCResponse;
     if (data.code !== "OK" || !data.items?.length) return null;
-
-    // Prefer items with "game" in category or title
     const best = data.items.find((i) =>
       /game|jeu|board/i.test(i.category ?? "") || /game|jeu|board/i.test(i.title)
     ) ?? data.items[0];
-
     return best.ean || null;
-  } catch {
+  } catch { return null; }
+}
+
+async function searchApify(nom: string): Promise<string | null> {
+  if (!APIFY_KEY) return null;
+  console.log(`    🌐  Apify Google Shopping : "${nom}"…`);
+  try {
+    const body = {
+      queries: [`${nom} jeu de société EAN barcode`],
+      maxPagesPerQuery: 1,
+      countryCode: "fr",
+      languageCode: "fr",
+    };
+    const res = await fetch(
+      `https://api.apify.com/v2/acts/apify~google-shopping-scraper/run-sync-get-dataset-items?token=${APIFY_KEY}&timeout=30`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+    );
+    if (!res.ok) return null;
+    const items = await res.json() as Array<{ gtin?: string; ean?: string; title?: string }>;
+    for (const item of items) {
+      const code = item.gtin ?? item.ean;
+      if (code && /^\d{8,14}$/.test(code)) return code;
+    }
     return null;
-  }
+  } catch { return null; }
 }
-
-/** Look up EAN by ASIN via UPCitemdb lookup endpoint */
-async function lookupByAsin(asin: string): Promise<string | null> {
-  // UPCitemdb does not support ASIN lookup directly; search by ASIN as keyword
-  return searchUPC(asin);
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("🔍  Fetch EAN pour les jeux Supabase\n");
+  if (APIFY_KEY) console.log("✅  Apify activé (Google Shopping fallback)\n");
 
   const { data: jeux, error } = await sb
     .from("jeux")
@@ -122,22 +129,38 @@ async function main() {
 
     let ean: string | null = null;
 
-    // 1. Try to get EAN from Amazon ASIN
+    // 1. ASIN → UPCitemdb
     const amazonEntry = (row.jeux_prix ?? []).find((p) => p.marchand === "amazon" && p.url);
     if (amazonEntry) {
       const asin = extractAsin(amazonEntry.url);
       if (asin) {
         console.log(`    🛒  ASIN: ${asin} — recherche UPCitemdb…`);
-        ean = await lookupByAsin(asin);
-        await sleep(RATE_MS);
+        ean = await searchUPC(asin);
+        if (ean) { console.log(`    ✅  EAN via ASIN: ${ean}`); }
+        else await sleep(RATE_MS);
       }
     }
 
-    // 2. Fallback: search by game name
+    // 2. UPCitemdb by name (English style)
     if (!ean) {
-      console.log(`    🔎  Recherche par nom : "${nom}"`);
+      console.log(`    🔎  UPCitemdb par nom : "${nom} board game"`);
       ean = await searchUPC(`${nom} board game`);
-      await sleep(RATE_MS);
+      if (ean) { console.log(`    ✅  EAN via nom (EN): ${ean}`); }
+      else await sleep(RATE_MS);
+    }
+
+    // 3. UPCitemdb by French name
+    if (!ean) {
+      console.log(`    🔎  UPCitemdb par nom FR : "${nom} jeu de société"`);
+      ean = await searchUPC(`${nom} jeu de société`);
+      if (ean) { console.log(`    ✅  EAN via nom (FR): ${ean}`); }
+      else await sleep(RATE_MS);
+    }
+
+    // 4. Apify Google Shopping
+    if (!ean) {
+      ean = await searchApify(nom);
+      if (ean) console.log(`    ✅  EAN via Apify: ${ean}`);
     }
 
     if (ean) {
@@ -146,7 +169,6 @@ async function main() {
         console.warn(`    ⚠  Supabase: ${upErr.message}`);
         skipped++;
       } else {
-        console.log(`    ✅  EAN: ${ean}`);
         found++;
       }
     } else {

@@ -53,6 +53,8 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [seoGenerating, setSeoGenerating] = useState<Set<string>>(new Set());
+  const [eanSearching, setEanSearching]   = useState<Set<string>>(new Set());
+  const [ytSearching, setYtSearching]     = useState<Set<string>>(new Set());
 
   const filtered = jeux.filter((j) =>
     j.nom.toLowerCase().includes(search.toLowerCase()),
@@ -133,6 +135,42 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
       showToast("error", e instanceof Error ? e.message : "Erreur SEO");
     } finally {
       setSeoGenerating(prev => { const s = new Set(prev); s.delete(slug); return s; });
+    }
+  }
+
+  async function searchEan(slug: string) {
+    setEanSearching(prev => new Set(prev).add(slug));
+    try {
+      const res = await fetch(`/api/admin/jeux/${slug}/fetch-ean`, { method: "POST" });
+      const data = await res.json() as { found?: boolean; ean?: string; error?: string; message?: string };
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      if (data.found && data.ean) {
+        showToast("success", `EAN trouvé : ${data.ean}`);
+      } else {
+        showToast("error", data.message ?? "EAN introuvable");
+      }
+    } catch (e) {
+      showToast("error", e instanceof Error ? e.message : "Erreur EAN");
+    } finally {
+      setEanSearching(prev => { const s = new Set(prev); s.delete(slug); return s; });
+    }
+  }
+
+  async function searchYoutube(slug: string) {
+    setYtSearching(prev => new Set(prev).add(slug));
+    try {
+      const res = await fetch(`/api/admin/jeux/${slug}/fetch-youtube`, { method: "POST" });
+      const data = await res.json() as { found?: boolean; youtube_id?: string; error?: string; message?: string };
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      if (data.found && data.youtube_id) {
+        showToast("success", `Vidéo trouvée : ${data.youtube_id}`);
+      } else {
+        showToast("error", data.message ?? "Aucune vidéo trouvée");
+      }
+    } catch (e) {
+      showToast("error", e instanceof Error ? e.message : "Erreur YouTube");
+    } finally {
+      setYtSearching(prev => { const s = new Set(prev); s.delete(slug); return s; });
     }
   }
 
@@ -268,6 +306,22 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                     {/* Actions */}
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => searchEan(jeu.slug)}
+                          disabled={eanSearching.has(jeu.slug)}
+                          title="Chercher le code EAN (barcode)"
+                          className="text-xs font-semibold px-2 py-1 rounded-lg bg-teal-100 text-teal-700 hover:bg-teal-200 disabled:opacity-50 transition-colors"
+                        >
+                          {eanSearching.has(jeu.slug) ? "…" : "🔍 EAN"}
+                        </button>
+                        <button
+                          onClick={() => searchYoutube(jeu.slug)}
+                          disabled={ytSearching.has(jeu.slug)}
+                          title="Chercher une vidéo YouTube"
+                          className="text-xs font-semibold px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition-colors"
+                        >
+                          {ytSearching.has(jeu.slug) ? "…" : "▶️ YT"}
+                        </button>
                         <button
                           onClick={() => regenerateSeo(jeu.slug, jeu.nom)}
                           disabled={seoGenerating.has(jeu.slug)}

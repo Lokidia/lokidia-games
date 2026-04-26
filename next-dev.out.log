@@ -155,3 +155,14 @@ Creating turbopack project {
  GET / 200 in 866ms (next.js: 128ms, proxy.ts: 249ms, application-code: 489ms)
  GET / 200 in 560ms (next.js: 4ms, proxy.ts: 281ms, application-code: 275ms)
  GET /manifest.webmanifest 200 in 71ms (next.js: 49ms, proxy.ts: 10ms, application-code: 12ms)
+○ Compiling /_not-found/page ...
+ GET /images/carcassonne.jpg 404 in 6.5s (next.js: 5.4s, application-code: 1054ms)
+ GET /images/pandemic.jpg 404 in 6.5s (next.js: 6.1s, application-code: 422ms)
+ GET /images/wingspan.jpg 404 in 6.5s (next.js: 5.7s, application-code: 819ms)
+✓ Compiled in 591ms
+ GET / 200 in 3.1s (next.js: 761ms, proxy.ts: 430ms, application-code: 1925ms)
+ GET / 200 in 306ms (next.js: 5ms, proxy.ts: 187ms, application-code: 114ms)
+✓ Compiled in 107ms
+ GET / 200 in 555ms (next.js: 202ms, proxy.ts: 197ms, application-code: 156ms)
+ GET / 200 in 271ms (next.js: 5ms, proxy.ts: 59ms, application-code: 206ms)
+ GET /manifest.webmanifest 200 in 242ms (next.js: 221ms, proxy.ts: 9ms, application-code: 12ms)

@@ -72,10 +72,20 @@ export default function EnrichissementManager({ initialJeux }: Props) {
   const [enrichingSlug, setEnrichingSlug] = useState<string | null>(null);
   const [toast, setToast]             = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
-  // Bulk enrichment state
+  // Bulk AI enrichment state
   const [bulkRunning, setBulkRunning] = useState(false);
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, current: "" });
   const abortBulkRef = useRef(false);
+
+  // Bulk EAN state
+  const [eanRunning, setEanRunning] = useState(false);
+  const [eanProgress, setEanProgress] = useState({ done: 0, total: 0, current: "" });
+  const abortEanRef = useRef(false);
+
+  // Bulk YouTube state
+  const [ytRunning, setYtRunning] = useState(false);
+  const [ytProgress, setYtProgress] = useState({ done: 0, total: 0, current: "" });
+  const abortYtRef = useRef(false);
 
   function showToast(type: "success" | "error", msg: string) {
     setToast({ type, msg });
@@ -145,6 +155,46 @@ export default function EnrichissementManager({ initialJeux }: Props) {
     showToast("success", `Enrichissement terminé : ${enriched} jeu${enriched > 1 ? "x" : ""} mis à jour`);
   }
 
+  async function enrichAllEan() {
+    abortEanRef.current = false;
+    setEanRunning(true);
+    setEanProgress({ done: 0, total: jeux.length, current: "" });
+    let found = 0;
+    for (let i = 0; i < jeux.length; i++) {
+      if (abortEanRef.current) break;
+      const jeu = jeux[i];
+      setEanProgress({ done: i, total: jeux.length, current: jeu.nom });
+      try {
+        const res = await fetch(`/api/admin/jeux/${jeu.slug}/fetch-ean`, { method: "POST" });
+        const data = await res.json() as { found?: boolean };
+        if (data.found) found++;
+      } catch { /* continue */ }
+      setEanProgress({ done: i + 1, total: jeux.length, current: jeu.nom });
+    }
+    setEanRunning(false);
+    showToast("success", `EAN : ${found} code${found > 1 ? "s" : ""} trouvé${found > 1 ? "s" : ""}`);
+  }
+
+  async function enrichAllYoutube() {
+    abortYtRef.current = false;
+    setYtRunning(true);
+    setYtProgress({ done: 0, total: jeux.length, current: "" });
+    let found = 0;
+    for (let i = 0; i < jeux.length; i++) {
+      if (abortYtRef.current) break;
+      const jeu = jeux[i];
+      setYtProgress({ done: i, total: jeux.length, current: jeu.nom });
+      try {
+        const res = await fetch(`/api/admin/jeux/${jeu.slug}/fetch-youtube`, { method: "POST" });
+        const data = await res.json() as { found?: boolean };
+        if (data.found) found++;
+      } catch { /* continue */ }
+      setYtProgress({ done: i + 1, total: jeux.length, current: jeu.nom });
+    }
+    setYtRunning(false);
+    showToast("success", `YouTube : ${found} vidéo${found > 1 ? "s" : ""} trouvée${found > 1 ? "s" : ""}`);
+  }
+
   const sorted = jeux
     .filter((j) => {
       const matchSearch = j.nom.toLowerCase().includes(search.toLowerCase());
@@ -204,30 +254,52 @@ export default function EnrichissementManager({ initialJeux }: Props) {
           </p>
         </div>
 
-        {bulkRunning ? (
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="text-sm text-gray-600 min-w-[180px]">
-              <p className="font-semibold">{bulkProgress.done}/{bulkProgress.total} traités…</p>
-              {bulkProgress.current && (
-                <p className="text-xs text-gray-400 truncate max-w-[200px]">{bulkProgress.current}</p>
-              )}
+        <div className="flex flex-wrap gap-2 shrink-0">
+          {/* AI bulk */}
+          {bulkRunning ? (
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2">
+              <div className="text-sm text-blue-700 min-w-[140px]">
+                <p className="font-semibold">🤖 {bulkProgress.done}/{bulkProgress.total}…</p>
+                {bulkProgress.current && <p className="text-xs truncate max-w-[160px] text-blue-500">{bulkProgress.current}</p>}
+              </div>
+              <button onClick={() => { abortBulkRef.current = true; setBulkRunning(false); }} className="text-xs font-bold text-red-600 hover:text-red-800">✕</button>
             </div>
-            <button
-              onClick={() => { abortBulkRef.current = true; setBulkRunning(false); }}
-              className="text-sm font-semibold text-red-600 border border-red-200 hover:bg-red-50 px-3 py-2 rounded-xl transition-colors"
-            >
-              ✕ Arrêter
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={enrichAll}
-            disabled={nbEnrichable === 0}
-            className="inline-flex items-center gap-2 bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm shrink-0"
-          >
-            🤖 Enrichir automatiquement tout ({nbEnrichable})
-          </button>
-        )}
+          ) : (
+            <button onClick={enrichAll} disabled={nbEnrichable === 0 || eanRunning || ytRunning}
+              className="inline-flex items-center gap-1.5 bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-bold px-3 py-2 rounded-xl text-sm transition-colors shadow-sm"
+            >🤖 IA ({nbEnrichable})</button>
+          )}
+
+          {/* EAN bulk */}
+          {eanRunning ? (
+            <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2">
+              <div className="text-sm text-teal-700 min-w-[140px]">
+                <p className="font-semibold">🔍 EAN {eanProgress.done}/{eanProgress.total}…</p>
+                {eanProgress.current && <p className="text-xs truncate max-w-[160px] text-teal-500">{eanProgress.current}</p>}
+              </div>
+              <button onClick={() => { abortEanRef.current = true; setEanRunning(false); }} className="text-xs font-bold text-red-600 hover:text-red-800">✕</button>
+            </div>
+          ) : (
+            <button onClick={enrichAllEan} disabled={bulkRunning || ytRunning}
+              className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 disabled:opacity-40 text-white font-bold px-3 py-2 rounded-xl text-sm transition-colors shadow-sm"
+            >🔍 Tout enrichir EAN</button>
+          )}
+
+          {/* YouTube bulk */}
+          {ytRunning ? (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              <div className="text-sm text-red-700 min-w-[140px]">
+                <p className="font-semibold">▶️ YT {ytProgress.done}/{ytProgress.total}…</p>
+                {ytProgress.current && <p className="text-xs truncate max-w-[160px] text-red-400">{ytProgress.current}</p>}
+              </div>
+              <button onClick={() => { abortYtRef.current = true; setYtRunning(false); }} className="text-xs font-bold text-red-600 hover:text-red-800">✕</button>
+            </div>
+          ) : (
+            <button onClick={enrichAllYoutube} disabled={bulkRunning || eanRunning}
+              className="inline-flex items-center gap-1.5 bg-red-700 hover:bg-red-800 disabled:opacity-40 text-white font-bold px-3 py-2 rounded-xl text-sm transition-colors shadow-sm"
+            >▶️ Tout enrichir YouTube</button>
+          )}
+        </div>
       </div>
 
       {toast && (
@@ -249,21 +321,50 @@ export default function EnrichissementManager({ initialJeux }: Props) {
           />
         </div>
 
-        {/* Bulk progress bar */}
+        {/* AI progress bar */}
         {(bulkRunning || bulkProgress.done > 0) && bulkProgress.total > 0 && (
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>Enrichissement automatique en cours</span>
+              <span>🤖 Enrichissement IA</span>
               <span>{bulkPct}%</span>
             </div>
             <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
-              <div
-                className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                style={{ width: `${bulkPct}%` }}
-              />
+              <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width: `${bulkPct}%` }} />
             </div>
           </div>
         )}
+
+        {/* EAN progress bar */}
+        {(eanRunning || eanProgress.done > 0) && eanProgress.total > 0 && (() => {
+          const pct = Math.round((eanProgress.done / eanProgress.total) * 100);
+          return (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>🔍 Enrichissement EAN</span>
+                <span>{pct}%</span>
+              </div>
+              <div className="w-full bg-teal-100 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-teal-500 rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* YouTube progress bar */}
+        {(ytRunning || ytProgress.done > 0) && ytProgress.total > 0 && (() => {
+          const pct = Math.round((ytProgress.done / ytProgress.total) * 100);
+          return (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>▶️ Enrichissement YouTube</span>
+                <span>{pct}%</span>
+              </div>
+              <div className="w-full bg-red-100 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-red-500 rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="text-xs text-gray-500">
           ✅ Image &nbsp;·&nbsp; ✅ Description &nbsp;·&nbsp; ✅ Règles &nbsp;·&nbsp; ✅ Prix &nbsp;·&nbsp; ✅ Catégories

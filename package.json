@@ -21,7 +21,8 @@
     "add-actif-column": "tsx scripts/add-actif-column.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",
     "fetch-spotify": "tsx scripts/fetch-spotify-playlists.ts",
-    "fetch-ean": "tsx scripts/fetch-ean.ts"
+    "fetch-ean": "tsx scripts/fetch-ean.ts",
+    "fetch-youtube": "tsx scripts/fetch-youtube.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
