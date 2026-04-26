@@ -1,0 +1,197 @@
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div> {
+  digest: '563735257'
+}
+⨯ ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div> {
+  digest: '563735257'
+}
+⨯ ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div> {
+  digest: '563735257'
+}
+⨯ ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div> {
+  digest: '563735257'
+}
+⨯ ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div> {
+  digest: '563735257'
+}
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: PhoneMockup is not defined
+    at Home (src\app\page.tsx:273:14)
+    at resolveErrorDev (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:1919:105)
+    at processFullStringRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2434:29)
+    at processFullBinaryRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2689:13)
+  271 |           {/* Mockup téléphone */}
+  272 |           <div className="flex justify-center md:justify-end">
+> 273 |             <PhoneMockup />
+      |              ^
+  274 |           </div>
+  275 |
+  276 |         </div>
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RedirectErrorBoundary router={{...}}>
+      <InnerLayoutRouter url="/gestion/jeux" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+        <SegmentViewNode type="page" pagePath="gestion/je...">
+          <SegmentTrieNode>
+          <AdminJeuxPage>
+            <div className="max-w-7xl ...">
+              <JeuxManager initialJeux={[...]} categories={[...]}>
+                <div className="space-y-6">
+                  <div>
+                  <input>
+                  <div className="bg-white r...">
+                    <div className="overflow-x...">
+                      <table className="w-full tex...">
+                        <thead>
+                        <tbody className="divide-y d...">
+                          <tr className="hover:bg-a...">
+                            <td>
+                            <td className="px-4 py-3">
+                              <p>
++                             <p className="text-xs text-gray-400 font-mono">
+-                             <div className="flex items-center gap-2 mt-0.5">
+                            ...
+                          ...
+        ...
+      ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at throwOnHydrationMismatch (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:3318:56)
+    at beginWork (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6758:918)
+    at runWithFiberInDEV (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)
+    at performUnitOfWork (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)
+    at workLoopConcurrentByScheduler (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9551:58)
+    at renderRootConcurrent (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9534:71)
+    at performWorkOnRoot (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:2647:64)
+    at p (<anonymous>)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/src_app_gestion_jeux__components_032r1qx._.js:2259:259)
+    at Array.map (<anonymous>)
+    at JeuxManager (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/src_app_gestion_jeux__components_032r1qx._.js:2211:46)
+    at AdminJeuxPage (src\app\gestion\jeux\page.tsx:21:7)
+  19 |   return (
+  20 |     <div className="max-w-7xl mx-auto px-6 py-10">
+> 21 |       <JeuxManager
+     |       ^
+  22 |         initialJeux={(jeuxRes.data as never[]) ?? []}
+  23 |         categories={(catsRes.data as never[]) ?? []}
+  24 |       />
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+    at dispatchAppRouterAction (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:916:37)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11800:61)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at Object.hmrRefresh (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11799:40)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13967:64)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at processMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13966:44)
+    at WebSocket.handleMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52)
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+    at dispatchAppRouterAction (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:916:37)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11800:61)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at Object.hmrRefresh (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11799:40)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13967:64)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at processMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13966:44)
+    at WebSocket.handleMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52)
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+    at dispatchAppRouterAction (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:916:37)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11800:61)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at Object.hmrRefresh (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11799:40)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13967:64)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at processMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13966:44)
+    at WebSocket.handleMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52)
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+    at dispatchAppRouterAction (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:916:37)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11800:61)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at Object.hmrRefresh (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11799:40)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13967:64)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at processMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13966:44)
+    at WebSocket.handleMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52)
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+    at dispatchAppRouterAction (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:916:37)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11800:61)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at Object.hmrRefresh (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:11799:40)
+    at <unknown> (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13967:64)
+    at startTransition (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:1279:31)
+    at processMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13966:44)
+    at WebSocket.handleMessage (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13335:52)
+⨯ ReferenceError: valeurCollection is not defined
+    at PublicProfilPage (src\app\profil\[pseudo]\page.tsx:130:16)
+  128 |           <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 te...
+  129 |             <p className="text-2xl font-black text-emerald-700">
+> 130 |               {valeurCollection > 0 ? `${Math.round(valeurCollection)} €` : "—"}
+      |                ^
+  131 |             </p>
+  132 |             <p className="text-xs text-gray-500 mt-0.5">💰 Valeur estim.</p>
+  133 |           </div> {
+  digest: '1726843710'
+}
+[browser] Uncaught TypeError: chunk.reason.enqueueModel is not a function
+    at resolveModelChunk (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:979:54)
+    at processFullStringRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2473:126)
+    at processFullBinaryRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2676:20)
+[browser] Image with src "https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__original/img/AkbtYVc6xXJF3c9EUrakklcclKw=/0x0/filters:format(png)/pic6973671.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)

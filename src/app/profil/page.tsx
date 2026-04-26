@@ -19,7 +19,17 @@ const STATUT_LABELS: Record<string, string> = {
   souhaite: "❤️ Souhaité",
 };
 
-type LudoItem = { statut: string; jeux: { slug: string; nom: string } | null };
+type LudoItem = {
+  statut: string;
+  jeux: {
+    slug: string;
+    nom: string;
+    image_url: string | null;
+    note: number;
+    jeux_prix: { prix: string; url: string; marchand: string }[];
+    jeux_categories: { categories: { nom: string } | null }[];
+  } | null;
+};
 
 type WishItem = {
   jeux: {
@@ -52,7 +62,7 @@ export default async function ProfilPage({
     svc.from("profiles").select("pseudo, created_at").eq("id", user.id).single(),
     svc
       .from("ludotheque")
-      .select("statut, jeux(slug, nom)")
+      .select("statut, jeux(slug, nom, image_url, note, jeux_prix(prix, url, marchand), jeux_categories(categories(nom)))")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     svc
@@ -68,6 +78,7 @@ export default async function ProfilPage({
 
   const possede  = items.filter(i => i.statut === "possede");
   const souhaite = items.filter(i => i.statut === "souhaite");
+
 
   // ── Fetch wishlist prices (only when needed) ──────────────────────────────
   let wishItems: WishItem[] = [];
@@ -233,7 +244,19 @@ export default async function ProfilPage({
 
             {/* ── Ludothèque section ─────────────────────────────────────── */}
             {tab === "ludotheque" && (
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6">
+                {/* Stats bande */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-2xl border border-amber-100 shadow-sm p-4 text-center">
+                    <p className="text-2xl font-black text-amber-800">{possede.length}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">📚 Possédés</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-4 text-center">
+                    <p className="text-2xl font-black text-rose-700">{souhaite.length}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">❤️ Souhaités</p>
+                  </div>
+                </div>
+
                 {items.length === 0 ? (
                   <EmptyState emoji="📚" text="Votre ludothèque est vide.">
                     <Link href="/jeux" className="text-amber-700 font-semibold hover:underline text-sm">
@@ -242,32 +265,31 @@ export default async function ProfilPage({
                   </EmptyState>
                 ) : (
                   <>
-                    {[
-                      { statut: "possede",  label: "Possédés", list: possede },
-                      { statut: "souhaite", label: "Souhaités", list: souhaite },
-                    ].map(({ statut, label, list }) =>
-                      list.length > 0 ? (
-                        <section key={statut}>
-                          <h2 className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-3 flex items-center gap-2">
-                            {STATUT_LABELS[statut]}
-                            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded-full">{list.length}</span>
-                          </h2>
-                          <div className="flex flex-col gap-2">
-                            {list.map((item, i) => item.jeux && (
-                              <Link
-                                key={i}
-                                href={`/jeu/${item.jeux.slug}`}
-                                className="bg-white rounded-xl border border-amber-100 px-4 py-3 flex items-center gap-3 hover:border-amber-300 transition-colors group"
-                              >
-                                <span className="font-semibold text-gray-900 text-sm group-hover:text-amber-800 transition-colors">
-                                  {item.jeux.nom}
-                                </span>
-                                <span className="ml-auto text-xs text-gray-300 group-hover:text-amber-400">→</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </section>
-                      ) : null
+                    {possede.length > 0 && (
+                      <section>
+                        <h2 className="text-sm font-black text-amber-950 mb-4">
+                          Ma collection{" "}
+                          <span className="text-amber-600 font-bold">({possede.length} jeu{possede.length > 1 ? "x" : ""})</span>
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {possede.map((item, i) => item.jeux && (
+                            <JeuCard key={i} jeu={item.jeux} statut="possede" />
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                    {souhaite.length > 0 && (
+                      <section>
+                        <h2 className="text-sm font-black text-amber-950 mb-4">
+                          Ma wishlist{" "}
+                          <span className="text-rose-600 font-bold">({souhaite.length} jeu{souhaite.length > 1 ? "x" : ""})</span>
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {souhaite.map((item, i) => item.jeux && (
+                            <JeuCard key={i} jeu={item.jeux} statut="souhaite" />
+                          ))}
+                        </div>
+                      </section>
                     )}
                   </>
                 )}
@@ -387,6 +409,45 @@ function Row({ label, value }: { label: string; value: string }) {
       <dt className="text-xs text-gray-400 w-28 shrink-0">{label}</dt>
       <dd className="text-sm font-semibold text-gray-800 break-all">{value}</dd>
     </div>
+  );
+}
+
+type JeuCardData = {
+  slug: string; nom: string; image_url: string | null; note: number;
+  jeux_categories?: { categories: { nom: string } | null }[];
+};
+
+function JeuCard({ jeu, statut }: { jeu: JeuCardData; statut: string }) {
+  const cats = (jeu.jeux_categories ?? []).map(jc => jc.categories?.nom).filter(Boolean) as string[];
+  return (
+    <Link
+      href={`/jeu/${jeu.slug}`}
+      className="group bg-white rounded-2xl border border-amber-100 shadow-sm hover:shadow-md hover:border-amber-300 transition-all overflow-hidden flex flex-col"
+    >
+      <div className="relative h-40 bg-amber-50 overflow-hidden">
+        {jeu.image_url ? (
+          <Image src={jeu.image_url} alt={jeu.nom} fill className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl">🎲</div>
+        )}
+        <span className={`absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm ${
+          statut === "possede" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
+        }`}>
+          {statut === "possede" ? "📚 Possédé" : "❤️ Souhaité"}
+        </span>
+      </div>
+      <div className="p-3 flex flex-col gap-1 flex-1">
+        <p className="font-bold text-sm text-gray-900 leading-tight line-clamp-2 group-hover:text-amber-800 transition-colors">{jeu.nom}</p>
+        {jeu.note > 0 && <p className="text-xs text-amber-600 font-semibold">★ {jeu.note.toFixed(1)}</p>}
+        {cats.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-auto pt-1">
+            {cats.slice(0, 2).map(cat => (
+              <span key={cat} className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">{cat}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
   );
 }
 

@@ -520,3 +520,109 @@ Creating turbopack project {
 [ScrollToTop] render, visible: false
  GET /jeu/arkham-horror 200 in 1935ms (next.js: 17ms, proxy.ts: 136ms, generate-params: 10ms, application-code: 1782ms)
  GET /manifest.webmanifest 200 in 76ms (next.js: 26ms, proxy.ts: 44ms, application-code: 6ms)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 141ms (next.js: 67ms, proxy.ts: 34ms, application-code: 40ms)
+ GET /jeu/arkham-horror 200 in 1127ms (next.js: 137ms, proxy.ts: 306ms, generate-params: 36ms, application-code: 683ms)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 80ms (next.js: 52ms, proxy.ts: 23ms, application-code: 5ms)
+ GET /jeu/arkham-horror 200 in 491ms (next.js: 20ms, proxy.ts: 111ms, generate-params: 8ms, application-code: 361ms)
+ GET /manifest.webmanifest 200 in 15ms (next.js: 4ms, proxy.ts: 5ms, application-code: 6ms)
+[ScrollToTop] render, visible: false
+ GET /gestion/login?from=%2Fgestion%2Fjeux 200 in 2.0s (next.js: 1068ms, proxy.ts: 103ms, application-code: 875ms)
+ GET /manifest.webmanifest 200 in 72ms (next.js: 9ms, proxy.ts: 58ms, application-code: 5ms)
+ POST /api/gestion/login 303 in 258ms (next.js: 123ms, proxy.ts: 90ms, application-code: 45ms)
+[ScrollToTop] render, visible: false
+ GET /gestion/jeux 200 in 3.8s (next.js: 242ms, proxy.ts: 136ms, application-code: 3.4s)
+ GET /manifest.webmanifest 200 in 39ms (next.js: 11ms, proxy.ts: 10ms, application-code: 18ms)
+ GET /manifest.webmanifest 200 in 13ms (next.js: 3ms, proxy.ts: 5ms, application-code: 4ms)
+ PATCH /api/admin/jeux/arkham-horror 200 in 2.6s (next.js: 2.4s, proxy.ts: 110ms, application-code: 104ms)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 183ms (next.js: 51ms, proxy.ts: 125ms, application-code: 7ms)
+ GET /jeu/arkham-horror 200 in 1206ms (next.js: 43ms, proxy.ts: 85ms, generate-params: 12ms, application-code: 1078ms)
+✓ Compiled in 1001ms
+ GET /gestion/jeux 200 in 2.9s (next.js: 1450ms, proxy.ts: 1085ms, application-code: 412ms)
+ GET /manifest.webmanifest 200 in 236ms (next.js: 184ms, proxy.ts: 19ms, application-code: 32ms)
+✓ Compiled in 198ms
+ GET /gestion/jeux 200 in 1510ms (next.js: 188ms, proxy.ts: 252ms, application-code: 1070ms)
+ GET /gestion/jeux 200 in 758ms (next.js: 6ms, proxy.ts: 209ms, application-code: 543ms)
+ GET /manifest.webmanifest 200 in 88ms (next.js: 64ms, proxy.ts: 18ms, application-code: 6ms)
+✓ Compiled in 1ms
+ GET /gestion/jeux 200 in 501ms (next.js: 151ms, proxy.ts: 254ms, application-code: 96ms)
+ GET /manifest.webmanifest 200 in 65ms (next.js: 46ms, proxy.ts: 11ms, application-code: 8ms)
+✓ Compiled in 115ms
+ GET /gestion/jeux 200 in 653ms (next.js: 234ms, proxy.ts: 206ms, application-code: 213ms)
+ GET /manifest.webmanifest 200 in 83ms (next.js: 63ms, proxy.ts: 12ms, application-code: 8ms)
+[ScrollToTop] render, visible: false
+ GET /gestion/jeux 200 in 7.3s (next.js: 1254ms, proxy.ts: 2.2s, application-code: 3.8s)
+ GET /manifest.webmanifest 200 in 38ms (next.js: 12ms, proxy.ts: 11ms, application-code: 15ms)
+ PATCH /api/admin/jeux/arkham-horror 200 in 418ms (next.js: 153ms, proxy.ts: 144ms, application-code: 121ms)
+ PATCH /api/admin/jeux/arkham-horror 200 in 420ms (next.js: 7ms, proxy.ts: 333ms, application-code: 80ms)
+[ScrollToTop] render, visible: false
+ GET /gestion/jeux 200 in 541ms (next.js: 5ms, proxy.ts: 63ms, application-code: 473ms)
+ GET /manifest.webmanifest 200 in 26ms (next.js: 5ms, proxy.ts: 16ms, application-code: 5ms)
+[ScrollToTop] render, visible: false
+ GET /jeu/arkham-horror 200 in 593ms (next.js: 136ms, proxy.ts: 130ms, generate-params: 6ms, application-code: 327ms)
+ GET /manifest.webmanifest 200 in 10ms (next.js: 2ms, proxy.ts: 4ms, application-code: 5ms)
+ PATCH /api/admin/jeux/arkham-horror 200 in 156ms (next.js: 11ms, proxy.ts: 91ms, application-code: 54ms)
+ GET /manifest.webmanifest 200 in 17ms (next.js: 5ms, proxy.ts: 8ms, application-code: 5ms)
+[ScrollToTop] render, visible: false
+ GET /jeu/arkham-horror 200 in 570ms (next.js: 15ms, proxy.ts: 73ms, generate-params: 9ms, application-code: 482ms)
+[ScrollToTop] render, visible: false
+ GET /jeu 404 in 1596ms (next.js: 1053ms, proxy.ts: 98ms, application-code: 444ms)
+ GET /manifest.webmanifest 200 in 28ms (next.js: 2ms, proxy.ts: 7ms, application-code: 19ms)
+ GET / 200 in 2.2s (next.js: 1819ms, proxy.ts: 55ms, application-code: 324ms)
+ GET /manifest.webmanifest 200 in 16ms (next.js: 6ms, proxy.ts: 5ms, application-code: 5ms)
+ GET /api/search?q=ar 200 in 694ms (next.js: 76ms, proxy.ts: 267ms, application-code: 351ms)
+ GET /api/search?q=ark 200 in 222ms (next.js: 3ms, proxy.ts: 76ms, application-code: 143ms)
+ GET /jeux?q=ark 200 in 681ms (next.js: 252ms, proxy.ts: 76ms, application-code: 353ms)
+ GET /manifest.webmanifest 200 in 16ms (next.js: 5ms, proxy.ts: 6ms, application-code: 5ms)
+ PATCH /api/admin/jeux/arkham-horror 200 in 299ms (next.js: 23ms, proxy.ts: 116ms, application-code: 160ms)
+[ScrollToTop] render, visible: false
+ GET /jeux?q=ark 200 in 676ms (next.js: 4ms, proxy.ts: 60ms, application-code: 612ms)
+ GET /manifest.webmanifest 200 in 10ms (next.js: 2ms, proxy.ts: 4ms, application-code: 4ms)
+✓ Compiled in 1260ms
+✓ Compiled in 183ms
+✓ Compiled in 1821ms
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 358ms (next.js: 152ms, proxy.ts: 172ms, application-code: 34ms)
+ GET / 200 in 1709ms (next.js: 251ms, proxy.ts: 107ms, application-code: 1352ms)
+○ Compiling /profil ...
+ GET /profil 200 in 8.8s (next.js: 7.1s, proxy.ts: 71ms, application-code: 1629ms)
+ GET /manifest.webmanifest 200 in 6.0s (next.js: 156ms, proxy.ts: 5.7s, application-code: 72ms)
+ GET /profil?tab=ludotheque 200 in 1243ms (next.js: 165ms, proxy.ts: 428ms, application-code: 650ms)
+ GET /manifest.webmanifest 200 in 79ms (next.js: 17ms, proxy.ts: 39ms, application-code: 24ms)
+ GET /profil?tab=wishlist 200 in 495ms (next.js: 11ms, proxy.ts: 154ms, application-code: 330ms)
+ GET /manifest.webmanifest 200 in 25ms (next.js: 9ms, proxy.ts: 9ms, application-code: 8ms)
+ GET /profil?tab=amis 200 in 327ms (next.js: 6ms, proxy.ts: 59ms, application-code: 261ms)
+ GET /manifest.webmanifest 200 in 26ms (next.js: 8ms, proxy.ts: 12ms, application-code: 6ms)
+ GET /api/amis 200 in 2.8s (next.js: 2.5s, proxy.ts: 60ms, application-code: 189ms)
+ GET /api/amis 200 in 175ms (next.js: 2ms, proxy.ts: 58ms, application-code: 114ms)
+○ Compiling /profil/[pseudo] ...
+ GET /profil/Alfmax 200 in 5.5s (next.js: 4.4s, proxy.ts: 63ms, application-code: 984ms)
+ GET /manifest.webmanifest 200 in 31ms (next.js: 8ms, proxy.ts: 18ms, application-code: 5ms)
+✓ Compiled in 1772ms
+✓ Compiled in 346ms
+✓ Compiled in 36ms
+ GET /profil/Alfmax 200 in 19.3s (next.js: 4.1s, proxy.ts: 12.5s, application-code: 2.7s)
+ GET /gestion/jeux 200 in 19.3s (next.js: 5.6s, proxy.ts: 12.6s, application-code: 1115ms)
+✓ Compiled in 2ms
+✓ Compiled in 17ms
+ GET /profil/Alfmax 200 in 27.1s (next.js: 11.5s, proxy.ts: 853ms, application-code: 14.8s)
+ GET /gestion/jeux 200 in 27.0s (next.js: 1851ms, proxy.ts: 723ms, application-code: 24.4s)
+ GET /gestion/jeux 200 in 17.3s (next.js: 4.6s, proxy.ts: 7.4s, application-code: 5.3s)
+ GET /gestion/jeux 200 in 14.3s (next.js: 5.5s, proxy.ts: 4.5s, application-code: 4.3s)
+ GET /profil/Alfmax 200 in 14.3s (next.js: 7.7s, proxy.ts: 4.5s, application-code: 2.2s)
+ GET /profil/Alfmax 200 in 14.4s (next.js: 9.3s, proxy.ts: 4.4s, application-code: 686ms)
+ GET /gestion/jeux 200 in 5.8s (next.js: 50ms, proxy.ts: 4.1s, application-code: 1703ms)
+ GET /profil/Alfmax 200 in 5.8s (next.js: 547ms, proxy.ts: 4.1s, application-code: 1202ms)
+ GET /gestion/jeux 200 in 1856ms (next.js: 25ms, proxy.ts: 813ms, application-code: 1017ms)
+ GET /profil/Alfmax 200 in 1776ms (next.js: 557ms, proxy.ts: 725ms, application-code: 494ms)
+ GET /gestion/jeux 200 in 1267ms (next.js: 169ms, proxy.ts: 763ms, application-code: 335ms)
+ GET /profil/Alfmax 200 in 1134ms (next.js: 304ms, proxy.ts: 584ms, application-code: 246ms)
+ GET /gestion/jeux 200 in 1434ms (next.js: 72ms, proxy.ts: 115ms, application-code: 1247ms)
+ GET /gestion/jeux 200 in 1362ms (next.js: 31ms, proxy.ts: 284ms, application-code: 1047ms)
+ GET /profil/Alfmax 200 in 1416ms (next.js: 359ms, proxy.ts: 152ms, application-code: 906ms)
+ GET /profil/Alfmax 200 in 1367ms (next.js: 236ms, proxy.ts: 687ms, application-code: 444ms)
+ GET /gestion/jeux 200 in 1400ms (next.js: 15ms, proxy.ts: 724ms, application-code: 661ms)
+ GET /profil/Alfmax 200 in 776ms (next.js: 19ms, proxy.ts: 96ms, application-code: 661ms)
+ GET /manifest.webmanifest 200 in 732ms (next.js: 603ms, proxy.ts: 11ms, application-code: 119ms)
