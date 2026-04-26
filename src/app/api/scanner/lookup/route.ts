@@ -24,16 +24,16 @@ export async function GET(req: NextRequest) {
 
   if (byEan) return NextResponse.json({ found: true, jeu: byEan });
 
-  // 2. Fallback: search without actif filter to detect inactive entries
+  // 2. Fallback: search without actif filter to surface inactive entries
   const { data: byEanAny } = await svc
     .from("jeux")
-    .select("slug, nom, actif, ean")
+    .select("slug, nom, image_url, note")
     .eq("ean", String(ean))
     .maybeSingle();
 
   if (byEanAny) {
     console.log(`[scanner/lookup] Jeu trouvé mais inactif:`, byEanAny);
-    return NextResponse.json({ found: false, ean, debug: "jeu_inactif" });
+    return NextResponse.json({ found: true, inactif: true, jeu: byEanAny });
   }
 
   // 3. EAN in Amazon/prix URL

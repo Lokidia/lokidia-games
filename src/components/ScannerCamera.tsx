@@ -12,6 +12,7 @@ interface FoundGame {
   nom: string;
   image_url: string | null;
   note: number;
+  inactif?: boolean;
 }
 
 export default function ScannerCamera() {
@@ -28,12 +29,14 @@ export default function ScannerCamera() {
     stopRef.current?.();
     setEan(code);
     const res = await fetch(`/api/scanner/lookup?ean=${encodeURIComponent(code)}`);
-    const data = await res.json() as { found: boolean; jeu?: FoundGame };
+    const data = await res.json() as { found: boolean; inactif?: boolean; jeu?: FoundGame };
     if (data.found && data.jeu) {
-      setGame(data.jeu);
+      setGame({ ...data.jeu, inactif: data.inactif });
       setState("found");
-      // Auto-redirect after 2s
-      setTimeout(() => router.push(`/jeu/${data.jeu!.slug}`), 2000);
+      // Auto-redirect only for active games
+      if (!data.inactif) {
+        setTimeout(() => router.push(`/jeu/${data.jeu!.slug}`), 2000);
+      }
     } else {
       setState("not_found");
     }
@@ -179,15 +182,18 @@ export default function ScannerCamera() {
 
         {/* Result overlay */}
         {state === "found" && game && (
-          <div className="absolute inset-0 bg-emerald-900/90 flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center ${game.inactif ? "bg-amber-900/90" : "bg-emerald-900/90"}`}>
             {game.image_url && (
               <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-lg">
                 <Image src={game.image_url} alt={game.nom} fill className="object-cover" unoptimized />
               </div>
             )}
-            <p className="text-2xl">✅</p>
+            <p className="text-2xl">{game.inactif ? "🔍" : "✅"}</p>
             <p className="text-white font-bold text-lg leading-tight">{game.nom}</p>
-            <p className="text-emerald-300 text-sm">Redirection en cours…</p>
+            {game.inactif
+              ? <p className="text-amber-300 text-xs">Fiche en cours de mise à jour</p>
+              : <p className="text-emerald-300 text-sm">Redirection en cours…</p>
+            }
           </div>
         )}
 
@@ -226,16 +232,21 @@ export default function ScannerCamera() {
       )}
 
       {state === "found" && game && (
-        <div className="flex gap-3">
-          <Link
-            href={`/jeu/${game.slug}`}
-            className="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
-          >
-            Voir la fiche →
-          </Link>
-          <button onClick={reset} className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:border-amber-300">
-            Scanner un autre
-          </button>
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-3">
+            <Link
+              href={`/jeu/${game.slug}`}
+              className="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Voir la fiche →
+            </Link>
+            <button onClick={reset} className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:border-amber-300">
+              Scanner un autre
+            </button>
+          </div>
+          {game.inactif && (
+            <p className="text-xs text-gray-400 italic">Fiche en cours de mise à jour</p>
+          )}
         </div>
       )}
 
