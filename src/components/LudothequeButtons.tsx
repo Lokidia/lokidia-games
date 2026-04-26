@@ -54,23 +54,23 @@ export default function LudothequeButtons({ jeuId }: { jeuId: string }) {
 
   if (!userId) {
     return (
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         {BUTTONS.map(({ label }) => (
           <Link
             key={label}
             href="/connexion"
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 text-gray-400 hover:border-amber-400 hover:text-amber-700 transition-colors"
+            className="text-base font-semibold px-6 py-3 rounded-xl border border-gray-200 text-gray-400 hover:border-amber-400 hover:text-amber-700 transition-colors"
           >
             {label}
           </Link>
         ))}
-        <span className="text-xs text-gray-400">— <Link href="/connexion" className="underline hover:text-amber-700">Connectez-vous</Link></span>
+        <span className="text-sm text-gray-400">— <Link href="/connexion" className="underline hover:text-amber-700">Connectez-vous</Link></span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col sm:flex-row gap-3">
       {BUTTONS.map(({ statut, label, activeClass }) => {
         const isActive = actifs.has(statut);
         const isLoading = pending === statut;
@@ -79,7 +79,7 @@ export default function LudothequeButtons({ jeuId }: { jeuId: string }) {
             key={statut}
             onClick={() => toggle(statut)}
             disabled={!!pending}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-60 ${
+            className={`text-base font-semibold px-6 py-3 rounded-xl border transition-colors disabled:opacity-60 ${
               isActive
                 ? activeClass
                 : "border-gray-200 text-gray-600 hover:border-amber-400 hover:text-amber-700"

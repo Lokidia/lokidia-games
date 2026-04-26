@@ -500,3 +500,5 @@ Creating turbopack project {
 }
  GET /api/scanner/lookup?ean=3760052143731 200 in 5.3s (next.js: 4.7s, proxy.ts: 87ms, application-code: 553ms)
 ✓ Finished filesystem cache database compaction in 36.9s
+✓ Compiled in 626ms
+✓ Compiled in 2.4s
