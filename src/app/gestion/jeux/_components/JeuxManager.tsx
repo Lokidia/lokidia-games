@@ -16,6 +16,8 @@ interface AdminJeuRow {
   image_url: string | null;
   updated_at: string;
   actif: boolean;
+  ean?: string | null;
+  youtube_id?: string | null;
   jeux_prix: { marchand: string; prix: string; url: string }[];
   jeux_categories: { categories: { id: string; nom: string } | null }[];
 }
@@ -143,13 +145,17 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
     try {
       const res = await fetch(`/api/admin/jeux/${slug}/fetch-ean`, { method: "POST" });
       const data = await res.json() as { found?: boolean; ean?: string; error?: string; message?: string };
+      console.log(`[searchEan] ${slug}:`, data);
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
       if (data.found && data.ean) {
+        // Update local state immediately
+        setJeux(prev => prev.map(j => j.slug === slug ? { ...j, ean: data.ean } : j));
         showToast("success", `EAN trouvé : ${data.ean}`);
       } else {
         showToast("error", data.message ?? "EAN introuvable");
       }
     } catch (e) {
+      console.error(`[searchEan] ${slug}:`, e);
       showToast("error", e instanceof Error ? e.message : "Erreur EAN");
     } finally {
       setEanSearching(prev => { const s = new Set(prev); s.delete(slug); return s; });
@@ -161,13 +167,17 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
     try {
       const res = await fetch(`/api/admin/jeux/${slug}/fetch-youtube`, { method: "POST" });
       const data = await res.json() as { found?: boolean; youtube_id?: string; error?: string; message?: string };
+      console.log(`[searchYoutube] ${slug}:`, data);
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
       if (data.found && data.youtube_id) {
+        // Update local state immediately
+        setJeux(prev => prev.map(j => j.slug === slug ? { ...j, youtube_id: data.youtube_id } : j));
         showToast("success", `Vidéo trouvée : ${data.youtube_id}`);
       } else {
         showToast("error", data.message ?? "Aucune vidéo trouvée");
       }
     } catch (e) {
+      console.error(`[searchYoutube] ${slug}:`, e);
       showToast("error", e instanceof Error ? e.message : "Erreur YouTube");
     } finally {
       setYtSearching(prev => { const s = new Set(prev); s.delete(slug); return s; });
@@ -264,7 +274,11 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                     {/* Nom */}
                     <td className="px-4 py-3">
                       <p className="font-semibold text-amber-900">{jeu.nom}</p>
-                      <p className="text-xs text-gray-400 font-mono">{jeu.slug}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-gray-400 font-mono">{jeu.slug}</p>
+                        {jeu.ean && <span className="text-xs bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded font-mono" title={`EAN: ${jeu.ean}`}>EAN ✓</span>}
+                        {jeu.youtube_id && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded" title={`YouTube: ${jeu.youtube_id}`}>YT ✓</span>}
+                      </div>
                     </td>
 
                     {/* Catégories */}
@@ -309,18 +323,18 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
                         <button
                           onClick={() => searchEan(jeu.slug)}
                           disabled={eanSearching.has(jeu.slug)}
-                          title="Chercher le code EAN (barcode)"
-                          className="text-xs font-semibold px-2 py-1 rounded-lg bg-teal-100 text-teal-700 hover:bg-teal-200 disabled:opacity-50 transition-colors"
+                          title={jeu.ean ? `EAN: ${jeu.ean} — rechercher` : "Chercher le code EAN (barcode)"}
+                          className={`text-xs font-semibold px-2 py-1 rounded-lg transition-colors disabled:opacity-50 ${jeu.ean ? "bg-teal-200 text-teal-800 hover:bg-teal-300" : "bg-teal-100 text-teal-700 hover:bg-teal-200"}`}
                         >
-                          {eanSearching.has(jeu.slug) ? "…" : "🔍 EAN"}
+                          {eanSearching.has(jeu.slug) ? "…" : jeu.ean ? "EAN ✓" : "🔍 EAN"}
                         </button>
                         <button
                           onClick={() => searchYoutube(jeu.slug)}
                           disabled={ytSearching.has(jeu.slug)}
-                          title="Chercher une vidéo YouTube"
-                          className="text-xs font-semibold px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition-colors"
+                          title={jeu.youtube_id ? `YT: ${jeu.youtube_id} — rechercher` : "Chercher une vidéo YouTube"}
+                          className={`text-xs font-semibold px-2 py-1 rounded-lg transition-colors disabled:opacity-50 ${jeu.youtube_id ? "bg-red-200 text-red-800 hover:bg-red-300" : "bg-red-100 text-red-700 hover:bg-red-200"}`}
                         >
-                          {ytSearching.has(jeu.slug) ? "…" : "▶️ YT"}
+                          {ytSearching.has(jeu.slug) ? "…" : jeu.youtube_id ? "YT ✓" : "▶️ YT"}
                         </button>
                         <button
                           onClick={() => regenerateSeo(jeu.slug, jeu.nom)}

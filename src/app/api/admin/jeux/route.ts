@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
 
 const LIST_SELECT = `
-  id, slug, nom, annee, complexite, note, image_url, updated_at,
+  id, slug, nom, annee, complexite, note, image_url, updated_at, actif, ean, youtube_id,
   jeux_prix(marchand, prix, url),
   jeux_categories(categories(id, nom))
 `;
