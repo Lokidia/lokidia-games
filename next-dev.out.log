@@ -502,3 +502,21 @@ Creating turbopack project {
 ✓ Finished filesystem cache database compaction in 36.9s
 ✓ Compiled in 626ms
 ✓ Compiled in 2.4s
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 591ms (next.js: 254ms, proxy.ts: 286ms, application-code: 51ms)
+ GET / 200 in 7.4s (next.js: 1215ms, proxy.ts: 67ms, application-code: 6.1s)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 486ms (next.js: 196ms, proxy.ts: 284ms, application-code: 6ms)
+ GET / 200 in 3.4s (next.js: 473ms, proxy.ts: 743ms, application-code: 2.2s)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 56ms (next.js: 34ms, proxy.ts: 14ms, application-code: 8ms)
+ GET / 200 in 631ms (next.js: 4ms, proxy.ts: 56ms, application-code: 571ms)
+○ Compiling /jeux/categorie/[slug] ...
+ GET /jeux/categorie/ambiance 200 in 6.5s (next.js: 5.6s, proxy.ts: 168ms, generate-params: 810ms, application-code: 746ms)
+ GET /jeux/categorie/cooperatif 200 in 2.9s (next.js: 2.0s, proxy.ts: 173ms, generate-params: 1353ms, application-code: 646ms)
+ GET /manifest.webmanifest 200 in 19ms (next.js: 2ms, proxy.ts: 11ms, application-code: 5ms)
+ GET /jeu/arkham-horror 200 in 1121ms (next.js: 855ms, proxy.ts: 68ms, generate-params: 8ms, application-code: 198ms)
+ GET /manifest.webmanifest 200 in 21ms (next.js: 3ms, proxy.ts: 7ms, application-code: 10ms)
+[ScrollToTop] render, visible: false
+ GET /jeu/arkham-horror 200 in 1935ms (next.js: 17ms, proxy.ts: 136ms, generate-params: 10ms, application-code: 1782ms)
+ GET /manifest.webmanifest 200 in 76ms (next.js: 26ms, proxy.ts: 44ms, application-code: 6ms)

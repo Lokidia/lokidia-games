@@ -88,15 +88,19 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
   }
 
   async function toggleActif(slug: string, current: boolean) {
+    const next = !current;
     const res = await fetch(`/api/admin/jeux/${slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ actif: !current }),
+      body: JSON.stringify({ actif: next }),
     });
+    const body = await res.json().catch(() => ({})) as { ok?: boolean; error?: string };
+    console.log(`[toggleActif] ${slug} → actif=${next}`, body);
     if (res.ok) {
-      setJeux((p) => p.map((j) => j.slug === slug ? { ...j, actif: !current } : j));
+      setJeux((p) => p.map((j) => j.slug === slug ? { ...j, actif: next } : j));
+      showToast("success", `"${slug}" ${next ? "activé" : "désactivé"}`);
     } else {
-      showToast("error", "Impossible de modifier l'état");
+      showToast("error", body.error ?? "Impossible de modifier l'état");
     }
   }
 
@@ -234,7 +238,7 @@ export default function JeuxManager({ initialJeux, categories }: Props) {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" suppressHydrationWarning>
             <thead>
               <tr className="border-b border-amber-100 bg-amber-50/60">
                 <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wide w-12">Img</th>

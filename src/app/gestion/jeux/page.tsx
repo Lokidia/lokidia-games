@@ -10,7 +10,7 @@ export default async function AdminJeuxPage() {
     sb
       .from("jeux")
       .select(
-        "id, slug, nom, annee, complexite, note, image_url, updated_at, actif, jeux_prix(marchand, prix, url), jeux_categories(categories(id, nom))",
+        "id, slug, nom, annee, complexite, note, image_url, updated_at, actif, ean, youtube_id, jeux_prix(marchand, prix, url), jeux_categories(categories(id, nom))",
       )
       .order("nom"),
     sb.from("categories").select("id, slug, nom, type, parent_id").order("nom"),

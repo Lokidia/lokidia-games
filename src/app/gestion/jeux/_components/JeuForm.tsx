@@ -90,7 +90,7 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
   const [nom, setNom] = useState(initialData?.nom ?? "");
   const [slug, setSlug] = useState(initialData?.slug ?? "");
   const [slugManual, setSlugManual] = useState(isEdit);
-  const [annee, setAnnee] = useState(initialData?.annee ?? new Date().getFullYear());
+  const [annee, setAnnee] = useState(() => initialData?.annee ?? new Date().getFullYear());
   const [description, setDescription] = useState(initialData?.description ?? "");
   const [joueursMin, setJoueursMin] = useState(initialData?.joueurs_min ?? 2);
   const [joueursMax, setJoueursMax] = useState(initialData?.joueurs_max ?? 4);
