@@ -184,7 +184,7 @@ export default function ScannerCamera() {
         {state === "found" && game && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center ${game.inactif ? "bg-amber-900/90" : "bg-emerald-900/90"}`}>
             {game.image_url && (
-              <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-lg">
+              <div className="relative w-24 h-24 rounded-lg overflow-hidden shadow-lg">
                 <Image src={game.image_url} alt={game.nom} fill className="object-cover" unoptimized />
               </div>
             )}
@@ -232,21 +232,16 @@ export default function ScannerCamera() {
       )}
 
       {state === "found" && game && (
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex gap-3">
-            <Link
-              href={`/jeu/${game.slug}`}
-              className="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
-            >
-              Voir la fiche →
-            </Link>
-            <button onClick={reset} className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:border-amber-300">
-              Scanner un autre
-            </button>
-          </div>
-          {game.inactif && (
-            <p className="text-xs text-gray-400 italic">Fiche en cours de mise à jour</p>
-          )}
+        <div className="flex gap-3">
+          <Link
+            href={`/jeu/${game.slug}`}
+            className="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+          >
+            Voir la fiche →
+          </Link>
+          <button onClick={reset} className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:border-amber-300">
+            Scanner un autre
+          </button>
         </div>
       )}
 

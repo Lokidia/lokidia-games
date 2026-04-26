@@ -489,3 +489,13 @@ Creating turbopack project {
  GET /manifest.webmanifest 200 in 54ms (next.js: 40ms, proxy.ts: 7ms, application-code: 7ms)
  GET / 200 in 1600ms (next.js: 112ms, proxy.ts: 392ms, application-code: 1096ms)
  GET /manifest.webmanifest 200 in 87ms (next.js: 33ms, proxy.ts: 26ms, application-code: 27ms)
+○ Compiling /api/scanner/lookup ...
+[scanner/lookup] EAN reçu (brut): "3760052143731" → normalisé: "3760052143731"
+[scanner/lookup] Résultat EAN direct: null 
+[scanner/lookup] Jeu trouvé mais inactif: {
+  slug: 'asmodee-trio-card-game-made-in-france-award-winning-golden-ace-2024-board-games-',
+  nom: 'Asmodee - Trio - Card Game Made in France - Award winning Golden Ace 2024 - Board Games for Families and Children from 7 Years - Deduction and Memory - 3 to 6 Players - 15 Min - French Version',
+  actif: false,
+  ean: '3760052143731'
+}
+ GET /api/scanner/lookup?ean=3760052143731 200 in 5.3s (next.js: 4.7s, proxy.ts: 87ms, application-code: 553ms)
