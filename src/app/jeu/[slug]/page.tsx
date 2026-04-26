@@ -275,22 +275,6 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
               )}
             </div>
 
-            {/* Vidéo YouTube */}
-            {jeu.youtubeId && (
-              <div>
-                <h2 className="text-lg font-bold text-amber-900 mb-3">▶️ Voir le jeu en vidéo</h2>
-                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-md">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${jeu.youtubeId}`}
-                    title={`${jeu.nom} — vidéo de présentation`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full border-0"
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Ambiance sonore Spotify */}
             {(jeu.spotifyPlaylistId ?? jeu.categorySpotifyPlaylistId) && (() => {
               const playlistId = (jeu.spotifyPlaylistId ?? jeu.categorySpotifyPlaylistId)!;
@@ -351,6 +335,22 @@ export default async function FicheJeu({ params }: { params: Promise<{ slug: str
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Vidéo YouTube */}
+            {jeu.youtubeId && (
+              <div>
+                <h2 className="text-lg font-bold text-amber-900 mb-3">▶️ Voir le jeu en vidéo</h2>
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-md">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${jeu.youtubeId}`}
+                    title={`${jeu.nom} — vidéo de présentation`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full border-0"
+                  />
+                </div>
               </div>
             )}
 
