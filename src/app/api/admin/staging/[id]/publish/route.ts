@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
 import {
   toSlug,
+  harmonizeName,
   enrichWithClaude,
   autoCategorize,
   autoAssociate,
@@ -35,15 +36,20 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     annee?: number;
   };
 
-  const slug = toSlug(row.nom);
+  // Harmonize name via Claude Haiku
+  let nom = row.nom;
+  try {
+    nom = await harmonizeName(row.nom);
+  } catch { /* keep original on error */ }
 
-  // Check duplicate in jeux
-  const { data: existing } = await sb
-    .from("jeux")
-    .select("id, slug")
-    .or(`slug.eq.${slug},nom.ilike.${row.nom}`)
-    .limit(1)
-    .maybeSingle();
+  const slug = toSlug(nom);
+
+  // Check duplicate in jeux (safe: two separate parameterized queries)
+  const { data: bySlug } = await sb.from("jeux").select("id, slug, nom").eq("slug", slug).maybeSingle();
+  const { data: byNom } = bySlug
+    ? { data: null }
+    : await sb.from("jeux").select("id, slug, nom").ilike("nom", nom).maybeSingle();
+  const existing = bySlug ?? byNom;
 
   if (existing) {
     await sb.from("jeux_staging").update({ statut: "approuve", jeu_id: (existing as { id: string }).id }).eq("id", id);
@@ -59,7 +65,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       row.data_brute?.rating ? `Note Amazon : ${row.data_brute.rating}/5` : "",
       row.data_brute?.reviewsCount ? `Avis Amazon : ${row.data_brute.reviewsCount}` : "",
     ].filter(Boolean).join("\n");
-    enriched = await enrichWithClaude(row.nom, scrapeContext);
+    enriched = await enrichWithClaude(nom, scrapeContext);
   } catch {
     enriched = {
       description: "",
@@ -79,7 +85,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .from("jeux")
     .insert({
       slug,
-      nom: row.nom,
+      nom,
       annee: row.annee ?? new Date().getFullYear(),
       description: enriched.description,
       joueurs_min: enriched.joueurs_min,
@@ -95,7 +101,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       image_url: row.image_url ?? null,
       actif: false,
     })
-    .select("id, slug")
+    .select("id, slug, nom")
     .single();
 
   if (insertErr || !jeuData) {
@@ -118,14 +124,20 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { data: allCats } = await sb.from("categories").select("id, nom, slug").eq("actif", true).order("nom");
   let catIds: string[] = [];
   try {
-    catIds = await autoCategorize(sb, jeuId, row.nom, enriched.description, allCats ?? []);
+    catIds = await autoCategorize(sb, jeuId, nom, enriched.description, allCats ?? []);
   } catch { /* silent */ }
   try {
-    await autoAssociate(sb, jeuId, row.nom, catIds);
+    await autoAssociate(sb, jeuId, nom, catIds);
   } catch { /* silent */ }
 
   // Mark staging as approved
   await sb.from("jeux_staging").update({ statut: "approuve", jeu_id: jeuId }).eq("id", id);
 
-  return NextResponse.json({ success: true, jeu: jeuData });
+  return NextResponse.json({
+    success: true,
+    jeu: jeuData,
+    nomOriginal: row.nom,
+    nomHarmonise: nom,
+    harmonise: nom !== row.nom,
+  });
 }

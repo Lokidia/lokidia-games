@@ -34,4 +34,5 @@ export type Jeu = {
   acheter: AcheterJeu;
   spotifyPlaylistId?: string | null;
   categorySpotifyPlaylistId?: string | null;
+  youtubeId?: string | null;
 };

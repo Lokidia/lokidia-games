@@ -1,0 +1,1 @@
+ALTER TABLE jeux ADD COLUMN IF NOT EXISTS youtube_id text;

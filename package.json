@@ -20,7 +20,8 @@
     "fix-orphan-categories": "tsx scripts/fix-orphan-categories.ts",
     "add-actif-column": "tsx scripts/add-actif-column.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",
-    "fetch-spotify": "tsx scripts/fetch-spotify-playlists.ts"
+    "fetch-spotify": "tsx scripts/fetch-spotify-playlists.ts",
+    "fetch-ean": "tsx scripts/fetch-ean.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",

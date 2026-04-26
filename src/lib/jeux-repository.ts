@@ -21,6 +21,7 @@ type SupabaseJeu = {
   points_forts: string[] | null;
   image_url: string | null;
   spotify_playlist_id: string | null;
+  youtube_id: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
   jeux_categories: { categories: { nom: string; slug: string; spotify_playlist_id: string | null } | null }[];
 };
@@ -62,13 +63,14 @@ function toJeu(row: SupabaseJeu): Jeu {
     categorySpotifyPlaylistId:
       (row.jeux_categories ?? []).find((jc) => jc.categories?.spotify_playlist_id)
         ?.categories?.spotify_playlist_id ?? null,
+    youtubeId: row.youtube_id ?? null,
   };
 }
 
 const JEUX_SELECT = `
   id, slug, nom, annee, description,
   joueurs_min, joueurs_max, duree_min, duree_max, age_min,
-  complexite, note, mecaniques, regles, points_forts, image_url, spotify_playlist_id,
+  complexite, note, mecaniques, regles, points_forts, image_url, spotify_playlist_id, youtube_id,
   jeux_prix(marchand, url, prix),
   jeux_categories(categories(nom, slug, spotify_playlist_id))
 `;

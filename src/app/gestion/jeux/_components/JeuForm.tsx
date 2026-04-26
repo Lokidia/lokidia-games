@@ -28,6 +28,8 @@ export interface AdminJeuFull {
   points_forts: string[] | null;
   image_url: string | null;
   spotify_playlist_id?: string | null;
+  youtube_id?: string | null;
+  ean?: string | null;
   jeux_prix: { marchand: string; url: string; prix: string }[];
   jeux_categories: { categorie_id: string; categories: { id: string; nom: string } | null }[];
 }
@@ -51,6 +53,16 @@ const MARCHAND_LABELS: Record<string, string> = {
 function parseSpotifyId(input: string): string {
   const match = input.match(/playlist\/([a-zA-Z0-9]+)/);
   return match ? match[1] : input;
+}
+
+function parseYoutubeId(input: string): string {
+  const watch = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (watch) return watch[1];
+  const short = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (short) return short[1];
+  const embed = input.match(/embed\/([a-zA-Z0-9_-]{11})/);
+  if (embed) return embed[1];
+  return input.trim();
 }
 
 function slugify(s: string) {
@@ -89,6 +101,8 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
   const [note, setNote] = useState(initialData?.note ?? 7);
   const [imageUrl, setImageUrl] = useState(initialData?.image_url ?? "");
   const [spotifyInput, setSpotifyInput] = useState(initialData?.spotify_playlist_id ?? "");
+  const [youtubeInput, setYoutubeInput] = useState(initialData?.youtube_id ?? "");
+  const [ean, setEan] = useState(initialData?.ean ?? "");
 
   // Prix
   const initPrix = (): PrixMap => {
@@ -259,6 +273,8 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
         points_forts: pointsForts.filter((p) => p.trim()),
         image_url: imageUrl || null,
         spotify_playlist_id: spotifyInput.trim() ? parseSpotifyId(spotifyInput.trim()) : null,
+        youtube_id: youtubeInput.trim() ? parseYoutubeId(youtubeInput.trim()) : null,
+        ean: ean.trim() || null,
         prix,
         categories: Array.from(selectedCatIds),
       };
@@ -338,6 +354,29 @@ export default function JeuForm({ initialData, categories, onSaved, onCancel }: 
               onChange={(e) => setSpotifyInput(e.target.value)}
               className="input"
               placeholder="https://open.spotify.com/playlist/… ou ID"
+            />
+          </div>
+          <div>
+            <label className="label">Vidéo YouTube <span className="text-gray-400 font-normal normal-case">(URL ou ID)</span></label>
+            <input
+              value={youtubeInput}
+              onChange={(e) => setYoutubeInput(e.target.value)}
+              className="input"
+              placeholder="https://youtu.be/… ou ID"
+            />
+            {youtubeInput.trim() && (
+              <p className="text-xs text-gray-400 mt-1 font-mono">ID : {parseYoutubeId(youtubeInput.trim())}</p>
+            )}
+          </div>
+          <div>
+            <label className="label">Code EAN <span className="text-gray-400 font-normal normal-case">(code-barres boîte)</span></label>
+            <input
+              value={ean}
+              onChange={(e) => setEan(e.target.value.replace(/\D/g, "").slice(0, 13))}
+              className="input font-mono"
+              placeholder="ex : 3558380063476"
+              inputMode="numeric"
+              maxLength={13}
             />
           </div>
           <div className="sm:col-span-2">

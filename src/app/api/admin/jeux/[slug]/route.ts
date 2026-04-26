@@ -4,7 +4,7 @@ import { createServiceClient } from "@/utils/supabase/service";
 const FULL_SELECT = `
   id, slug, nom, annee, description,
   joueurs_min, joueurs_max, duree_min, duree_max, age_min,
-  complexite, note, mecaniques, regles, points_forts, image_url, spotify_playlist_id, updated_at,
+  complexite, note, mecaniques, regles, points_forts, image_url, spotify_playlist_id, youtube_id, ean, updated_at,
   jeux_prix(marchand, prix, url),
   jeux_categories(categorie_id, categories(id, nom))
 `;

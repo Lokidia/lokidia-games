@@ -5,6 +5,28 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export const AFFILIATE_TAG = "lokidia21-21";
 
+export async function harmonizeName(nom: string): Promise<string> {
+  const msg = await anthropic.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 60,
+    messages: [{
+      role: "user",
+      content: `Harmonise ce nom de jeu de société pour le catalogue français :
+- Supprime les préfixes commerciaux inutiles : "Asmodee -", "GIGAMIC -", "IELLO -", "VF -", "Jeu de société -", etc.
+- Corrige les noms entièrement en MAJUSCULES (ex: "CATAN" → "Catan", "PANDEMIC" → "Pandemic")
+- Met la première lettre du premier mot en majuscule, le reste en minuscules (sauf noms propres et sigles)
+- Traduis en français si une traduction officielle reconnue existe (ex: "Ticket to Ride" → "Les Aventuriers du Rail", "Pandemic" → "Pandémie")
+- Si aucune traduction officielle n'est connue avec certitude, garde le nom original
+
+Nom à harmoniser : "${nom}"
+Réponds UNIQUEMENT avec le nom harmonisé, sans guillemets, sans explication.`,
+    }],
+  });
+  const block = msg.content[0];
+  if (!block || block.type !== "text") return nom;
+  return block.text.trim() || nom;
+}
+
 export function toSlug(nom: string): string {
   return nom
     .toLowerCase()
