@@ -195,3 +195,9 @@ https://react.dev/link/hydration-mismatch
     at progress (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2676:20)
 [browser] Image with src "https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__original/img/AkbtYVc6xXJF3c9EUrakklcclKw=/0x0/filters:format(png)/pic6973671.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_115brz8._.js:2431:13)
+[browser] Uncaught TypeError: chunk.reason.enqueueModel is not a function
+    at resolveModelChunk (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:979:54)
+    at processFullStringRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2473:126)
+    at processFullBinaryRow (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2393:9)
+    at processBinaryChunk (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2502:221)
+    at progress (file://C:/Users/33601/Desktop/Projet IA JeuxSo/encyclopedie-jeux/.next/dev/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_0p3wegg._.js:2676:20)

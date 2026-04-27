@@ -60,13 +60,6 @@ export default async function Home() {
     getJeuxCount(),
   ]);
 
-  const STATS = [
-    { icone: "🎲", value: String(jeuxCount), label: "jeux actifs",        accent: "text-amber-700",  ring: "ring-amber-200",  bg: "bg-amber-50"  },
-    { icone: "🏪", value: "4",               label: "boutiques comparées", accent: "text-emerald-700", ring: "ring-emerald-200", bg: "bg-emerald-50" },
-    { icone: "⚡", value: "5 min",           label: "pour choisir",        accent: "text-blue-700",   ring: "ring-blue-200",   bg: "bg-blue-50"   },
-    { icone: "✨", value: "Gratuit",         label: "accès libre",         accent: "text-violet-700", ring: "ring-violet-200", bg: "bg-violet-50" },
-  ];
-
   return (
     <div className="flex flex-col bg-white">
 
@@ -111,21 +104,6 @@ export default async function Home() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="border-b border-amber-100 bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {STATS.map((s) => (
-            <div key={s.label} className={`rounded-xl ${s.bg} ring-1 ${s.ring} px-4 py-4 flex items-center gap-3`}>
-              <span className="text-2xl shrink-0">{s.icone}</span>
-              <div>
-                <p className={`text-2xl font-black ${s.accent}`}>{s.value}</p>
-                <p className="text-xs font-semibold text-gray-500">{s.label}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 

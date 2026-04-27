@@ -626,3 +626,41 @@ Creating turbopack project {
  GET /gestion/jeux 200 in 1400ms (next.js: 15ms, proxy.ts: 724ms, application-code: 661ms)
  GET /profil/Alfmax 200 in 776ms (next.js: 19ms, proxy.ts: 96ms, application-code: 661ms)
  GET /manifest.webmanifest 200 in 732ms (next.js: 603ms, proxy.ts: 11ms, application-code: 119ms)
+[ScrollToTop] render, visible: false
+ GET /profil/Alfmax 200 in 1568ms (next.js: 68ms, proxy.ts: 213ms, application-code: 1287ms)
+ GET /manifest.webmanifest 200 in 67ms (next.js: 20ms, proxy.ts: 10ms, application-code: 37ms)
+✓ Compiled in 1669ms
+✓ Compiled in 621ms
+ GET /gestion/jeux 200 in 8.6s (next.js: 2.5s, proxy.ts: 1192ms, application-code: 4.9s)
+ GET /profil/Alfmax 200 in 8.0s (next.js: 1579ms, proxy.ts: 526ms, application-code: 5.9s)
+ GET /profil/Alfmax 200 in 5.3s (next.js: 112ms, proxy.ts: 493ms, application-code: 4.7s)
+ GET /gestion/jeux 200 in 5.0s (next.js: 133ms, proxy.ts: 1517ms, application-code: 3.3s)
+ GET /gestion/jeux 200 in 2.5s (next.js: 1353ms, proxy.ts: 858ms, application-code: 269ms)
+ GET /gestion/jeux 200 in 178ms (next.js: 5ms, proxy.ts: 67ms, application-code: 106ms)
+ GET /manifest.webmanifest 200 in 228ms (next.js: 191ms, proxy.ts: 8ms, application-code: 30ms)
+[ScrollToTop] render, visible: false
+ GET /profil/Alfmax 200 in 2.4s (next.js: 142ms, proxy.ts: 70ms, application-code: 2.2s)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 118ms (next.js: 78ms, proxy.ts: 28ms, application-code: 12ms)
+ GET /profil/Alfmax 200 in 757ms (next.js: 19ms, proxy.ts: 57ms, application-code: 680ms)
+ GET / 200 in 1886ms (next.js: 1292ms, proxy.ts: 76ms, application-code: 519ms)
+ GET /manifest.webmanifest 200 in 60ms (next.js: 22ms, proxy.ts: 29ms, application-code: 8ms)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 129ms (next.js: 93ms, proxy.ts: 30ms, application-code: 5ms)
+ GET / 200 in 4.7s (next.js: 23ms, proxy.ts: 112ms, application-code: 4.6s)
+[ScrollToTop] render, visible: false
+ GET / 200 in 3.7s (next.js: 4ms, proxy.ts: 3.5s, application-code: 251ms)
+ GET /manifest.webmanifest 200 in 13ms (next.js: 3ms, proxy.ts: 5ms, application-code: 6ms)
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 61ms (next.js: 30ms, proxy.ts: 24ms, application-code: 7ms)
+ GET / 200 in 693ms (next.js: 61ms, proxy.ts: 197ms, application-code: 436ms)
+✓ Compiled in 1147ms
+ GET / 200 in 2.2s (next.js: 1096ms, proxy.ts: 789ms, application-code: 297ms)
+ GET / 200 in 174ms (next.js: 4ms, proxy.ts: 97ms, application-code: 73ms)
+✓ Compiled in 212ms
+[ScrollToTop] render, visible: false
+ GET /manifest.webmanifest 200 in 3.2s (next.js: 2.6s, proxy.ts: 480ms, application-code: 65ms)
+✓ Compiled in 710ms
+ GET / 200 in 13.7s (next.js: 284ms, proxy.ts: 262ms, application-code: 13.2s)
+ GET / 200 in 5.2s (next.js: 1602ms, proxy.ts: 3.0s, application-code: 648ms)
+ GET / 200 in 284ms (next.js: 10ms, proxy.ts: 106ms, application-code: 168ms)
